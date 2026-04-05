@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora Matemática do Winston</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="hero">
+      <p class="eyebrow">Matemática aplicada</p>
+      <h1>Aplicativo com cálculos do Winston.</h1>
+      <p class="subtitle">Ferramenta rápida para juros, equações e inequações de 1º e 2º grau.</p>
+      <p class="active-module">Módulo ativo: <strong id="moduloAtivo">Juros Compostos</strong></p>
+    </header>
+
+    <nav class="tab-bar" aria-label="Módulos matemáticos" role="tablist">
+      <button id="tab-juros-compostos" class="tab-btn active" data-tab="juros-compostos" role="tab" aria-selected="true" aria-controls="juros-compostos">Juros Compostos</button>
+      <button id="tab-juros-simples" class="tab-btn" data-tab="juros-simples" role="tab" aria-selected="false" aria-controls="juros-simples">Juros Simples</button>
+      <button id="tab-equacao-primeiro" class="tab-btn" data-tab="equacao-primeiro" role="tab" aria-selected="false" aria-controls="equacao-primeiro">Equação 1º</button>
+      <button id="tab-equacao-segundo" class="tab-btn" data-tab="equacao-segundo" role="tab" aria-selected="false" aria-controls="equacao-segundo">Equação 2º</button>
+      <button id="tab-inequacao-primeiro" class="tab-btn" data-tab="inequacao-primeiro" role="tab" aria-selected="false" aria-controls="inequacao-primeiro">Inequação 1º</button>
+      <button id="tab-inequacao-segundo" class="tab-btn" data-tab="inequacao-segundo" role="tab" aria-selected="false" aria-controls="inequacao-segundo">Inequação 2º</button>
+    </nav>
+
+    <section id="juros-compostos" class="panel active" aria-live="polite" role="tabpanel" aria-labelledby="tab-juros-compostos">
+      <h2>Juros Compostos</h2>
+      <p class="panel-note">Preencha o valor e escolha a unidade. Se taxa e tempo estiverem em unidades diferentes, o sistema faz a equivalência automaticamente.</p>
+      <div class="interest-layout">
+        <div>
+          <div class="grid-inputs">
+            <label>Capital inicial
+              <input type="number" id="capitalComposto" placeholder="Ex.: 1500" min="0" step="any" inputmode="decimal">
+            </label>
+            <label>Taxa de juros (% por período)
+              <input type="number" id="taxaComposta" placeholder="Ex.: 1.8" min="0" step="any" inputmode="decimal">
+              <small class="field-help">Ex.: 10% ao mês é diferente de 10% ao dia.</small>
+            </label>
+            <label>Unidade da taxa
+              <select id="taxaCompostaUnidade">
+                <option value="dia">Dia</option>
+                <option value="mes" selected>Mês</option>
+                <option value="ano">Ano</option>
+              </select>
+              <small class="field-help">Mostra em que intervalo a taxa vale.</small>
+            </label>
+            <label>Tempo de cálculo
+              <input type="number" id="tempoComposto" placeholder="Ex.: 12" min="0" step="any" inputmode="decimal">
+              <small class="field-help">Quantidade de períodos que você quer calcular.</small>
+            </label>
+            <label>Unidade do tempo
+              <select id="tempoCompostoUnidade">
+                <option value="dia">Dias</option>
+                <option value="mes" selected>Meses</option>
+                <option value="ano">Anos</option>
+              </select>
+              <small class="field-help">Define a unidade do número informado acima.</small>
+            </label>
+          </div>
+
+          <div class="quick-examples" aria-label="Exemplos rápidos de juros compostos">
+            <span>Exemplos rápidos:</span>
+            <button type="button" class="example-btn" data-kind="composto" data-example="investimento">Investimento 12 meses</button>
+            <button type="button" class="example-btn" data-kind="composto" data-example="curto">Ciclo curto diário</button>
+          </div>
+
+          <p class="live-explain" id="explicaComposto">Preencha os campos para visualizar o cenário antes de calcular.</p>
+        </div>
+
+        <aside class="formula-card" aria-label="Explicação da fórmula de juros compostos">
+          <p class="formula-title">Fórmula principal</p>
+          <p class="formula-line">M = C(1 + i)<sup>t</sup></p>
+          <p class="formula-title">Significado das letras</p>
+          <ul class="formula-list">
+            <li>M = montante final</li>
+            <li>C = capital inicial</li>
+            <li>i = taxa em decimal</li>
+            <li>t = número de períodos</li>
+          </ul>
+        </aside>
+      </div>
+      <div class="actions">
+        <button class="action" id="btnComposto">Calcular</button>
+        <button class="ghost-action clear-btn" type="button" data-panel="juros-compostos" data-output="saidaComposto">Limpar</button>
+      </div>
+      <p class="result" id="saidaComposto"></p>
+    </section>
+
+    <section id="juros-simples" class="panel" aria-live="polite" role="tabpanel" aria-labelledby="tab-juros-simples">
+      <h2>Juros Simples</h2>
+      <p class="panel-note">Preencha o valor e escolha a unidade. Se taxa e tempo estiverem em unidades diferentes, o sistema faz a equivalência automaticamente.</p>
+      <div class="interest-layout">
+        <div>
+          <div class="grid-inputs">
+            <label>Capital inicial
+              <input type="number" id="capitalSimples" placeholder="Ex.: 1500" min="0" step="any" inputmode="decimal">
+            </label>
+            <label>Taxa de juros (% por período)
+              <input type="number" id="taxaSimples" placeholder="Ex.: 2" min="0" step="any" inputmode="decimal">
+              <small class="field-help">Ex.: 2% ao mês ou 2% ao dia.</small>
+            </label>
+            <label>Unidade da taxa
+              <select id="taxaSimplesUnidade">
+                <option value="dia">Dia</option>
+                <option value="mes" selected>Mês</option>
+                <option value="ano">Ano</option>
+              </select>
+              <small class="field-help">Indica a base da porcentagem.</small>
+            </label>
+            <label>Tempo de cálculo
+              <input type="number" id="tempoSimples" placeholder="Ex.: 6" min="0" step="any" inputmode="decimal">
+              <small class="field-help">Informe apenas o número.</small>
+            </label>
+            <label>Unidade do tempo
+              <select id="tempoSimplesUnidade">
+                <option value="dia">Dias</option>
+                <option value="mes" selected>Meses</option>
+                <option value="ano">Anos</option>
+              </select>
+              <small class="field-help">Define se o tempo está em dias, meses ou anos.</small>
+            </label>
+          </div>
+
+          <div class="quick-examples" aria-label="Exemplos rápidos de juros simples">
+            <span>Exemplos rápidos:</span>
+            <button type="button" class="example-btn" data-kind="simples" data-example="emprestimo">Empréstimo 6 meses</button>
+            <button type="button" class="example-btn" data-kind="simples" data-example="anual">Aplicação anual</button>
+          </div>
+
+          <p class="live-explain" id="explicaSimples">Preencha os campos para visualizar o cenário antes de calcular.</p>
+        </div>
+
+        <aside class="formula-card" aria-label="Explicação da fórmula de juros simples">
+          <p class="formula-title">Fórmula principal</p>
+          <p class="formula-line">J = C.i.t</p>
+          <p class="formula-line formula-line-secondary">M = C + J</p>
+          <p class="formula-title">Significado das letras</p>
+          <ul class="formula-list">
+            <li>J = juros acumulados</li>
+            <li>M = montante final</li>
+            <li>C = capital inicial</li>
+            <li>i = taxa em decimal</li>
+            <li>t = número de períodos</li>
+          </ul>
+        </aside>
+      </div>
+      <div class="actions">
+        <button class="action" id="btnSimples">Calcular</button>
+        <button class="ghost-action clear-btn" type="button" data-panel="juros-simples" data-output="saidaSimples">Limpar</button>
+      </div>
+      <p class="result" id="saidaSimples"></p>
+    </section>
+
+    <section id="equacao-primeiro" class="panel" aria-live="polite" role="tabpanel" aria-labelledby="tab-equacao-primeiro">
+      <h2>Equação do 1º grau (ax + b = 0)</h2>
+      <p class="panel-note">Informe coeficientes reais para resolver x de forma direta.</p>
+      <div class="grid-inputs">
+        <label>Coeficiente a
+          <input type="number" id="eq1a" placeholder="Ex.: 3" step="any" inputmode="decimal">
+        </label>
+        <label>Coeficiente b
+          <input type="number" id="eq1b" placeholder="Ex.: -9" step="any" inputmode="decimal">
+        </label>
+      </div>
+      <div class="actions">
+        <button class="action" id="btnEq1">Resolver</button>
+        <button class="ghost-action clear-btn" type="button" data-panel="equacao-primeiro" data-output="saidaEq1">Limpar</button>
+      </div>
+      <p class="result" id="saidaEq1"></p>
+    </section>
+
+    <section id="equacao-segundo" class="panel" aria-live="polite" role="tabpanel" aria-labelledby="tab-equacao-segundo">
+      <h2>Equação do 2º grau (ax² + bx + c = 0)</h2>
+      <p class="panel-note">A ferramenta mostra delta e raízes reais quando existirem.</p>
+      <div class="grid-inputs">
+        <label>Coeficiente a
+          <input type="number" id="eq2a" placeholder="Ex.: 1" step="any" inputmode="decimal">
+        </label>
+        <label>Coeficiente b
+          <input type="number" id="eq2b" placeholder="Ex.: -5" step="any" inputmode="decimal">
+        </label>
+        <label>Coeficiente c
+          <input type="number" id="eq2c" placeholder="Ex.: 6" step="any" inputmode="decimal">
+        </label>
+      </div>
+      <div class="actions">
+        <button class="action" id="btnEq2">Resolver</button>
+        <button class="ghost-action clear-btn" type="button" data-panel="equacao-segundo" data-output="saidaEq2">Limpar</button>
+      </div>
+      <p class="result" id="saidaEq2"></p>
+    </section>
+
+    <section id="inequacao-primeiro" class="panel" aria-live="polite" role="tabpanel" aria-labelledby="tab-inequacao-primeiro">
+      <h2>Inequação do 1º grau (ax + b &gt; 0)</h2>
+      <p class="panel-note">Receba a faixa de valores de x que satisfaz a desigualdade.</p>
+      <div class="grid-inputs">
+        <label>Coeficiente a
+          <input type="number" id="ineq1a" placeholder="Ex.: -2" step="any" inputmode="decimal">
+        </label>
+        <label>Coeficiente b
+          <input type="number" id="ineq1b" placeholder="Ex.: 8" step="any" inputmode="decimal">
+        </label>
+      </div>
+      <div class="actions">
+        <button class="action" id="btnIneq1">Resolver</button>
+        <button class="ghost-action clear-btn" type="button" data-panel="inequacao-primeiro" data-output="saidaIneq1">Limpar</button>
+      </div>
+      <p class="result" id="saidaIneq1"></p>
+    </section>
+
+    <section id="inequacao-segundo" class="panel" aria-live="polite" role="tabpanel" aria-labelledby="tab-inequacao-segundo">
+      <h2>Inequação do 2º grau (ax² + bx + c &gt; 0)</h2>
+      <p class="panel-note">O resultado mostra intervalos de solução conforme o sinal da parábola.</p>
+      <div class="grid-inputs">
+        <label>Coeficiente a
+          <input type="number" id="ineq2a" placeholder="Ex.: 1" step="any" inputmode="decimal">
+        </label>
+        <label>Coeficiente b
+          <input type="number" id="ineq2b" placeholder="Ex.: -3" step="any" inputmode="decimal">
+        </label>
+        <label>Coeficiente c
+          <input type="number" id="ineq2c" placeholder="Ex.: -4" step="any" inputmode="decimal">
+        </label>
+      </div>
+      <div class="actions">
+        <button class="action" id="btnIneq2">Resolver</button>
+        <button class="ghost-action clear-btn" type="button" data-panel="inequacao-segundo" data-output="saidaIneq2">Limpar</button>
+      </div>
+      <p class="result" id="saidaIneq2"></p>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
