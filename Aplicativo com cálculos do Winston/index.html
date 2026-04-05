@@ -8,6 +8,62 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <script>
+    window.aplicarExemplo = function(kind, example) {
+      const presets = {
+        "composto:investimento": {
+          capitalComposto: "2500",
+          taxaComposta: "1.2",
+          taxaCompostaUnidade: "mes",
+          tempoComposto: "12",
+          tempoCompostoUnidade: "mes"
+        },
+        "composto:curto": {
+          capitalComposto: "1500",
+          taxaComposta: "0.15",
+          taxaCompostaUnidade: "dia",
+          tempoComposto: "45",
+          tempoCompostoUnidade: "dia"
+        },
+        "simples:emprestimo": {
+          capitalSimples: "1800",
+          taxaSimples: "2",
+          taxaSimplesUnidade: "mes",
+          tempoSimples: "6",
+          tempoSimplesUnidade: "mes"
+        },
+        "simples:anual": {
+          capitalSimples: "5000",
+          taxaSimples: "10",
+          taxaSimplesUnidade: "ano",
+          tempoSimples: "1",
+          tempoSimplesUnidade: "ano"
+        }
+      };
+
+      const preset = presets[`${kind}:${example}`];
+
+      if (!preset) {
+        return;
+      }
+
+      Object.entries(preset).forEach(([id, value]) => {
+        const field = document.getElementById(id);
+
+        if (!field) {
+          return;
+        }
+
+        field.value = value;
+        field.dispatchEvent(new Event("input", { bubbles: true }));
+        field.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+
+      if (typeof window.atualizarExplicacaoJuros === "function") {
+        window.atualizarExplicacaoJuros(kind);
+      }
+    };
+  </script>
 </head>
 <body>
   <main class="app-shell">
@@ -48,7 +104,7 @@
               </select>
               <small class="field-help">Mostra em que intervalo a taxa vale.</small>
             </label>
-            <label>Tempo de cálculo
+            <label class="tempo-field">Tempo de cálculo
               <input type="number" id="tempoComposto" placeholder="Ex.: 12" min="0" step="any" inputmode="decimal">
               <small class="field-help">Quantidade de períodos que você quer calcular.</small>
             </label>
@@ -64,8 +120,8 @@
 
           <div class="quick-examples" aria-label="Exemplos rápidos de juros compostos">
             <span>Exemplos rápidos:</span>
-            <button type="button" class="example-btn" data-kind="composto" data-example="investimento">Investimento 12 meses</button>
-            <button type="button" class="example-btn" data-kind="composto" data-example="curto">Ciclo curto diário</button>
+            <button type="button" class="example-btn" data-kind="composto" data-example="investimento" onclick="aplicarExemplo('composto','investimento')">Investimento 12 meses</button>
+            <button type="button" class="example-btn" data-kind="composto" data-example="curto" onclick="aplicarExemplo('composto','curto')">Ciclo curto diário</button>
           </div>
 
           <p class="live-explain" id="explicaComposto">Preencha os campos para visualizar o cenário antes de calcular.</p>
@@ -111,7 +167,7 @@
               </select>
               <small class="field-help">Indica a base da porcentagem.</small>
             </label>
-            <label>Tempo de cálculo
+            <label class="tempo-field">Tempo de cálculo
               <input type="number" id="tempoSimples" placeholder="Ex.: 6" min="0" step="any" inputmode="decimal">
               <small class="field-help">Informe apenas o número.</small>
             </label>
@@ -127,8 +183,8 @@
 
           <div class="quick-examples" aria-label="Exemplos rápidos de juros simples">
             <span>Exemplos rápidos:</span>
-            <button type="button" class="example-btn" data-kind="simples" data-example="emprestimo">Empréstimo 6 meses</button>
-            <button type="button" class="example-btn" data-kind="simples" data-example="anual">Aplicação anual</button>
+            <button type="button" class="example-btn" data-kind="simples" data-example="emprestimo" onclick="aplicarExemplo('simples','emprestimo')">Empréstimo 6 meses</button>
+            <button type="button" class="example-btn" data-kind="simples" data-example="anual" onclick="aplicarExemplo('simples','anual')">Aplicação anual</button>
           </div>
 
           <p class="live-explain" id="explicaSimples">Preencha os campos para visualizar o cenário antes de calcular.</p>

@@ -194,6 +194,8 @@ function atualizarExplicacaoJuros(tipo) {
     `Isso equivale a ${formatNumber(periodos, 4)} período(s) da taxa, com ${jurosTexto}.`;
 }
 
+window.atualizarExplicacaoJuros = atualizarExplicacaoJuros;
+
 function preencherExemplo(kind, example) {
   if (kind === "composto" && example === "investimento") {
     byId("capitalComposto").value = "2500";
@@ -234,6 +236,12 @@ function preencherExemplo(kind, example) {
     atualizarExplicacaoJuros("simples");
   }
 }
+
+function aplicarExemplo(kind, example) {
+  preencherExemplo(kind, example);
+}
+
+window.aplicarExemplo = aplicarExemplo;
 
 function calcularJurosCompostos() {
   const capital = toNumber("capitalComposto");
@@ -437,10 +445,14 @@ document.querySelectorAll(".clear-btn").forEach((button) => {
   });
 });
 
-document.querySelectorAll(".example-btn").forEach((button) => {
-  button.addEventListener("click", () => {
-    preencherExemplo(button.dataset.kind, button.dataset.example);
-  });
+document.addEventListener("click", (event) => {
+  const button = event.target.closest(".example-btn");
+
+  if (!button) {
+    return;
+  }
+
+  preencherExemplo(button.dataset.kind, button.dataset.example);
 });
 
 ["capitalComposto", "taxaComposta", "tempoComposto", "taxaCompostaUnidade", "tempoCompostoUnidade"].forEach((id) => {

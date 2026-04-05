@@ -225,6 +225,10 @@ label {
   line-height: 1.35;
 }
 
+.tempo-field .field-help {
+  margin-bottom: 10px;
+}
+
 input {
   border: 1px solid #d8ccb9;
   border-radius: 10px;
