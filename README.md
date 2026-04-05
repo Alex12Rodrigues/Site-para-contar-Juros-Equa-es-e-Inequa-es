@@ -149,62 +149,47 @@ O sistema analisa o delta e o sinal de `a` para informar o intervalo de soluçã
 
 ## Como executar localmente
 
-### Opção 1: abrir direto no navegador
-1. Baixe ou clone o projeto.
-2. Abra a pasta no computador.
-3. Dê dois cliques em `index.html`.
-4. O projeto será aberto no navegador.
+### Opção 1: clonar do GitHub com Git (recomendado)
+1. Copie a URL do repositório no GitHub (botão **Code**).
+2. Abra o terminal (PowerShell, Prompt de Comando ou terminal do VS Code).
+3. Navegue até a pasta onde deseja salvar o projeto:
 
-### Opção 2: abrir pelo VS Code
+	```bash
+	cd caminho/da/sua/pasta
+	```
+
+4. Clone o repositório:
+
+	```bash
+	git clone URL_DO_REPOSITORIO
+	```
+
+5. Entre na pasta criada:
+
+	```bash
+	cd NOME_DO_REPOSITORIO
+	```
+
+6. Abra o arquivo `index.html` com dois cliques, ou arraste-o para o navegador.
+
+### Opção 2: baixar ZIP do GitHub (sem Git)
+1. No GitHub, clique em **Code** > **Download ZIP**.
+2. Extraia o arquivo ZIP no seu computador.
+3. Abra a pasta extraída.
+4. Dê dois cliques em `index.html` para abrir no navegador.
+
+### Opção 3: executar pelo VS Code com Live Server
 1. Abra a pasta do projeto no VS Code.
-2. Clique com o botão direito em `index.html`.
-3. Escolha a opção para abrir no navegador, ou use uma extensão como Live Server.
+2. Instale a extensão **Live Server** (se ainda não tiver).
+3. Clique com o botão direito em `index.html`.
+4. Selecione **Open with Live Server**.
+5. O projeto abrirá no navegador com recarregamento automático a cada alteração.
 
-## Como publicar no GitHub
-
-### 1. Criar o repositório
-1. Entre na sua conta do GitHub.
-2. Crie um repositório novo.
-3. Dê um nome ao projeto.
-4. Envie os arquivos `index.html`, `style.css`, `script.js` e `README.md`.
-
-### 2. Conferir se o README está completo
-Verifique se o README explica:
-
-- o que o projeto faz
-- como executar
-- como funciona cada tela
-- onde acessar a versão online
-
-### 3. Atualizar depois de mudanças
-Sempre que alterar o projeto:
-
-1. Faça as alterações locais
-2. Atualize os arquivos no GitHub
-3. Confirme se a versão publicada continua funcionando
-
-## Como publicar no InfinityFree
-
-### 1. Preparar os arquivos
-Deixe na raiz do site somente os arquivos do projeto:
-
-- `index.html`
-- `style.css`
-- `script.js`
-
-Se houver pastas extras, confira se elas realmente são necessárias.
-
-### 2. Enviar para o servidor
-1. Acesse o painel do InfinityFree.
-2. Abra o Gerenciador de Arquivos ou envie por FTP.
-3. Coloque os arquivos dentro da pasta pública do site, normalmente `htdocs` ou equivalente.
-4. Garanta que o arquivo principal seja `index.html`.
-
-### 3. Testar no navegador
-1. Abra o endereço do site.
-2. Verifique se a página carrega.
-3. Teste todos os botões e cálculos.
-4. Confirme se o layout aparece corretamente no celular e no computador.
+### Verificação rápida após abrir
+1. Teste a troca entre as abas (juros, equações e inequações).
+2. Preencha os campos e clique em **Calcular** ou **Resolver**.
+3. Confira se os resultados aparecem e se o botão **Limpar** funciona.
+4. Teste também no celular (ou no modo responsivo do navegador).
 
 ## Observações importantes
 
@@ -212,14 +197,6 @@ Se houver pastas extras, confira se elas realmente são necessárias.
 - A lógica dos cálculos está em JavaScript puro.
 - As telas de juros têm explicações e exemplos rápidos para facilitar o uso.
 - O sistema mostra mensagens claras quando o usuário tenta preencher algo inválido.
-
-## Dica para apresentação
-Se o professor abrir o site, você pode explicar assim:
-
-- o sistema recebe os valores do usuário
-- valida os dados antes de calcular
-- converte as unidades quando necessário
-- mostra o resultado e uma explicação para facilitar o entendimento
 
 ## Autor
 
