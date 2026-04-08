@@ -11,6 +11,141 @@
   --warn: #b4472d;
 }
 
+body.dark-mode {
+  --bg-1: #0f1419;
+  --bg-2: #161b27;
+  --paper: #1e2633;
+  --ink: #e8eef5;
+  --muted: #9ca3b3;
+  --accent: #ff8c42;
+  --accent-2: #00bcd4;
+  --line: #2d3645;
+  --ok: #4caf50;
+  --warn: #ff6b6b;
+}
+
+body.dark-mode {
+  background:
+    radial-gradient(circle at 8% 12%, rgba(255, 140, 66, 0.05), transparent 38%),
+    radial-gradient(circle at 92% 88%, rgba(0, 188, 212, 0.05), transparent 42%),
+    linear-gradient(155deg, #0f1419, #161b27);
+}
+
+body.dark-mode input,
+body.dark-mode select {
+  background-color: #252d39 !important;
+  color: #e8eef5 !important;
+  border-color: #3d4556 !important;
+}
+
+body.dark-mode input::placeholder {
+  color: #7a8293 !important;
+}
+
+body.dark-mode input:focus,
+body.dark-mode select:focus {
+  border-color: #00bcd4 !important;
+  background-color: #2d3645 !important;
+}
+
+body.dark-mode .tab-btn {
+  background-color: #1e2633;
+  color: #9ca3b3;
+  border-color: #2d3645;
+}
+
+body.dark-mode .tab-btn:hover {
+  border-color: #ff8c42;
+}
+
+body.dark-mode .tab-btn.active {
+  background-color: #e8eef5;
+  color: #0f1419;
+  border-color: #e8eef5;
+}
+
+body.dark-mode .action {
+  background: linear-gradient(120deg, #ff8c42, #ffaa66);
+}
+
+body.dark-mode .ghost-action {
+  background-color: #1e2633;
+  color: #e8eef5;
+  border-color: #2d3645;
+}
+
+body.dark-mode .ghost-action:hover {
+  border-color: #00bcd4;
+}
+
+body.dark-mode .result {
+  background-color: #1e2633;
+  border-color: #3d4556;
+  color: #4caf50;
+}
+
+body.dark-mode .result.error {
+  color: #ff6b6b;
+  border-color: #5d3a3a;
+  background-color: #2a1a1a;
+}
+
+body.dark-mode .formula-card {
+  background-color: #252d39;
+  border-color: #2d3645;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .live-explain {
+  background-color: #1a2332;
+  border-color: #00bcd4;
+  color: #9ca3b3;
+}
+
+body.dark-mode .panel {
+  background: linear-gradient(180deg, #1e2633, #161b27);
+  border-color: #2d3645;
+}
+
+body.dark-mode .history-box {
+  background-color: #252d39;
+  border-color: #2d3645;
+}
+
+body.dark-mode .history-item {
+  background-color: #1e2633;
+  border-color: #2d3645;
+}
+
+body.dark-mode .history-empty {
+  background-color: #1e2633;
+  border-color: #2d3645;
+  color: #7a8293;
+}
+
+body.dark-mode table {
+  color: #e8eef5;
+}
+
+body.dark-mode table th {
+  background-color: #252d39;
+  color: #e8eef5;
+  border-color: #2d3645;
+}
+
+body.dark-mode table td {
+  border-color: #2d3645;
+  background-color: #1e2633;
+}
+
+body.dark-mode table tbody tr:hover {
+  background-color: rgba(255, 140, 66, 0.08);
+}
+
+body.dark-mode svg {
+  color: #e8eef5;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -37,8 +172,56 @@ body {
   box-shadow: 0 20px 45px rgba(20, 33, 61, 0.08);
 }
 
+body.dark-mode .app-shell {
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.3);
+  background: var(--paper);
+}
+
 .hero {
   margin-bottom: 14px;
+  position: relative;
+}
+
+.theme-toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  border: none;
+  background: var(--accent-2);
+  color: #fff;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  font-size: 1.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 159, 183, 0.25);
+}
+
+.theme-toggle:hover {
+  transform: scale(1.1) rotate(20deg);
+  box-shadow: 0 6px 16px rgba(0, 159, 183, 0.35);
+}
+
+body.dark-mode .theme-toggle {
+  background: #ff9500;
+  box-shadow: 0 4px 12px rgba(255, 149, 0, 0.25);
+}
+
+body.dark-mode .theme-toggle:hover {
+  box-shadow: 0 6px 16px rgba(255, 149, 0, 0.35);
+}
+
+.theme-icon {
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+.theme-toggle:active .theme-icon {
+  transform: scale(0.8);
 }
 
 .hero h1 {
@@ -220,6 +403,35 @@ body {
 
 .example-btn:hover {
   border-color: var(--accent-2);
+}
+
+body.dark-mode .example-btn {
+  background-color: #252d39;
+  color: #e8eef5;
+  border-color: #3d4556;
+}
+
+body.dark-mode .example-btn:hover {
+  border-color: #00bcd4;
+  background-color: #2d3645;
+}
+
+body.dark-mode .active-module {
+  background-color: #252d39;
+  border-color: #2d3645;
+  color: #9ca3b3;
+}
+
+body.dark-mode .active-module strong {
+  color: #e8eef5;
+}
+
+body.dark-mode label {
+  color: #e8eef5;
+}
+
+body.dark-mode .field-help {
+  color: #7a8293;
 }
 
 .live-explain {

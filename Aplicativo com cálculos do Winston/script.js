@@ -2,6 +2,31 @@ const tabButtons = document.querySelectorAll(".tab-btn");
 const panels = document.querySelectorAll(".panel");
 const activeModuleText = byId("moduloAtivo");
 
+// Dark Mode Toggle
+(function() {
+  const themeToggle = document.getElementById("themeToggle");
+  const THEME_KEY = "winston_theme";
+  
+  // Verifica se existe preferência salva
+  const savedTheme = localStorage.getItem(THEME_KEY);
+  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const isDarkMode = savedTheme ? savedTheme === "dark" : prefersDark;
+  
+  // Aplica o tema ao carregar
+  if (isDarkMode) {
+    document.body.classList.add("dark-mode");
+    themeToggle.querySelector(".theme-icon").textContent = "☀️";
+  }
+  
+  // Event listener para o botão
+  themeToggle.addEventListener("click", function() {
+    document.body.classList.toggle("dark-mode");
+    const isDark = document.body.classList.contains("dark-mode");
+    localStorage.setItem(THEME_KEY, isDark ? "dark" : "light");
+    themeToggle.querySelector(".theme-icon").textContent = isDark ? "☀️" : "🌙";
+  });
+})();
+
 const calculatorsByPanel = {
   "juros-compostos": calcularJurosCompostos,
   "juros-simples": calcularJurosSimples,
