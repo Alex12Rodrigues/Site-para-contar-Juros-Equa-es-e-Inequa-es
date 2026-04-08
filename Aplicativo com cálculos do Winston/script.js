@@ -719,6 +719,110 @@ function formatIntervalCondition(symbol, min, max, leftOp, rightOp) {
   return `${minFmt} ${leftOp} ${symbol} ${rightOp} ${maxFmt}`;
 }
 
+function criarGraficoCartesiano(xMin, xMax, yMin, yMax) {
+  const padding = 40;
+  const svgWidth = 400;
+  const svgHeight = 400;
+  const graphWidth = svgWidth - 2 * padding;
+  const graphHeight = svgHeight - 2 * padding;
+
+  const xRange = xMax - xMin;
+  const yRange = yMax - yMin;
+  const xStep = (xMax - xMin) / 6;
+  const yStep = (yMax - yMin) / 6;
+
+  const toSvgX = (x) => padding + ((x - xMin) / xRange) * graphWidth;
+  const toSvgY = (y) => padding + graphHeight - ((y - yMin) / yRange) * graphHeight;
+
+  let svgContent = `<svg width="${svgWidth}" height="${svgHeight}" style="border: 1px solid #ddd; margin: 10px 0; background: #fafafa;">`;
+
+  svgContent += `<defs><style>
+    .grid-line { stroke: #e0e0e0; stroke-width: 1; }
+    .axis { stroke: #333; stroke-width: 2; }
+    .tick { stroke: #666; stroke-width: 1; }
+    .axis-label { font-size: 12px; fill: #333; }
+    .point { fill: #ff7a30; r: 4; }
+    .point-hover { r: 6; }
+  </style></defs>`;
+
+  for (let x = xMin; x <= xMax; x += xStep) {
+    const sx = toSvgX(x);
+    svgContent += `<line class="grid-line" x1="${sx}" y1="${padding}" x2="${sx}" y2="${svgHeight - padding}" />`;
+  }
+
+  for (let y = yMin; y <= yMax; y += yStep) {
+    const sy = toSvgY(y);
+    svgContent += `<line class="grid-line" x1="${padding}" y1="${sy}" x2="${svgWidth - padding}" y2="${sy}" />`;
+  }
+
+  const originX = toSvgX(0);
+  const originY = toSvgY(0);
+
+  if (originX >= padding && originX <= svgWidth - padding) {
+    svgContent += `<line class="axis" x1="${originX}" y1="${padding}" x2="${originX}" y2="${svgHeight - padding}" />`;
+  }
+
+  if (originY >= padding && originY <= svgHeight - padding) {
+    svgContent += `<line class="axis" x1="${padding}" y1="${originY}" x2="${svgWidth - padding}" y2="${originY}" />`;
+  }
+
+  svgContent += `<line class="axis" x1="${padding}" y1="${padding}" x2="${padding}" y2="${svgHeight - padding}" />`;
+  svgContent += `<line class="axis" x1="${padding}" y1="${svgHeight - padding}" x2="${svgWidth - padding}" y2="${svgHeight - padding}" />`;
+
+  for (let x = xMin; x <= xMax; x += xStep) {
+    const sx = toSvgX(x);
+    svgContent += `<line class="tick" x1="${sx}" y1="${svgHeight - padding - 3}" x2="${sx}" y2="${svgHeight - padding + 3}" />`;
+    svgContent += `<text class="axis-label" x="${sx}" y="${svgHeight - padding + 15}" text-anchor="middle">${formatNumber(x, 2)}</text>`;
+  }
+
+  for (let y = yMin; y <= yMax; y += yStep) {
+    const sy = toSvgY(y);
+    svgContent += `<line class="tick" x1="${padding - 3}" y1="${sy}" x2="${padding + 3}" y2="${sy}" />`;
+    svgContent += `<text class="axis-label" x="${padding - 10}" y="${sy + 4}" text-anchor="end">${formatNumber(y, 2)}</text>`;
+  }
+
+  const points = [];
+  let current = xMin;
+  while (current <= xMax + 1e-10) {
+    const x = current;
+    const yVal = Math.sin(x * Math.PI / (xMax - xMin)) * (yMax - yMin) / 2 + (yMin + yMax) / 2;
+    const y = Math.max(yMin, Math.min(yMax, yVal));
+    points.push({ x, y });
+    current += xStep / 3;
+  }
+
+  points.forEach((point) => {
+    const sx = toSvgX(point.x);
+    const sy = toSvgY(point.y);
+    svgContent += `<circle class="point" cx="${sx}" cy="${sy}" data-x="${formatNumber(point.x, 2)}" data-y="${formatNumber(point.y, 2)}" title="x: ${formatNumber(point.x, 2)}, y: ${formatNumber(point.y, 2)}" />`;
+  });
+
+  svgContent += `<text class="axis-label" x="${svgWidth / 2}" y="${svgHeight - 5}" text-anchor="middle" style="font-size: 14px;">x</text>`;
+  svgContent += `<text class="axis-label" x="15" y="${svgHeight / 2}" text-anchor="middle" style="font-size: 14px; transform: rotate(-90deg); transform-origin: 15px ${svgHeight / 2};">y</text>`;
+
+  svgContent += `</svg>`;
+
+  let tableContent = `<table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+    <thead style="background: #f0f0f0;">
+      <tr style="border-bottom: 2px solid #ddd;">
+        <th style="padding: 8px; text-align: left;">x</th>
+        <th style="padding: 8px; text-align: left;">y</th>
+      </tr>
+    </thead>
+    <tbody>`;
+
+  points.slice(0, 8).forEach((point) => {
+    tableContent += `<tr style="border-bottom: 1px solid #eee;">
+      <td style="padding: 6px;">${formatNumber(point.x, 3)}</td>
+      <td style="padding: 6px;">${formatNumber(point.y, 3)}</td>
+    </tr>`;
+  });
+
+  tableContent += `</tbody></table>`;
+
+  return `<div style="margin-top: 15px;">${svgContent}${tableContent}</div>`;
+}
+
 function gerarDominioImagem() {
   const xMin = toNumber("domXMin");
   const xMax = toNumber("domXMax");
@@ -747,7 +851,10 @@ function gerarDominioImagem() {
   const imagem = yCond === "vazio" ? "Im = conjunto vazio" : `Im = {y ∈ R | ${yCond}}`;
   const saida = `${dominio} | ${imagem}`;
 
-  print("saidaDominioImagem", saida);
+  const grafico = criarGraficoCartesiano(xMin, xMax, yMin, yMax);
+  const saidaCompleta = `<div>${saida}${grafico}</div>`;
+
+  byId("saidaDominioImagem").innerHTML = saidaCompleta;
   addHistoryEntry("Domínio e Imagem", saida);
 }
 

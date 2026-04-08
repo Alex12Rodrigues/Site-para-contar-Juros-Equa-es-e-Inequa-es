@@ -382,6 +382,38 @@ select:focus {
   }
 }
 
+svg {
+  overflow: visible;
+}
+
+svg .point {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+svg .point:hover {
+  fill: #ff5a00;
+  filter: drop-shadow(0 2px 4px rgba(255, 122, 48, 0.3));
+}
+
+table {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.9rem;
+}
+
+table th, table td {
+  border-color: var(--line);
+}
+
+table th {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+table tbody tr:hover {
+  background: rgba(255, 122, 48, 0.05);
+}
+
 @media (max-width: 560px) {
   .app-shell {
     padding: 18px;
