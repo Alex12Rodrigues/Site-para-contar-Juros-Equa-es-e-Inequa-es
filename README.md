@@ -12,12 +12,15 @@ O objetivo do projeto é deixar os cálculos mais simples de entender, com uma i
 
 O sistema possui as seguintes telas:
 
-- Juros compostos
-- Juros simples
+- Juros Compostos
+- Juros Simples
 - Equação do 1º grau
 - Equação do 2º grau
 - Inequação do 1º grau
 - Inequação do 2º grau
+- Conjuntos
+- Domínio e Imagem (com gráfico interativo)
+- Histórico de cálculos
 
 ## Como o usuário deve usar
 
@@ -39,6 +42,11 @@ Clique no botão correspondente:
 
 ### 4. Ler o resultado
 O resultado aparece logo abaixo dos botões, com mensagens de erro claras caso algum dado esteja incorreto.
+
+Alguns resultados são acompanhados de gráficos para melhor visualização da solução (Domínio e Imagem exibe um gráfico cartesiano interativo).
+
+### 5. Consultar histórico
+Na aba **Histórico**, você pode ver um registro de todos os cálculos realizados durante a sessão.
 
 ## Passo a passo das telas de juros
 
@@ -128,6 +136,39 @@ Forma geral:
 $$ax^2 + bx + c > 0$$
 
 O sistema analisa o delta e o sinal de `a` para informar o intervalo de solução.
+
+## Conjuntos
+
+A tela de conjuntos permite calcular operações entre dois conjuntos A e B.
+
+### Operações disponíveis:
+
+- **União (A ∪ B)**: todos os elementos que pertencem a A ou a B ou a ambos
+- **Interseção (A ∩ B)**: apenas elementos que pertencem a A e a B simultaneamente
+- **Diferença (A - B)**: elementos que estão em A mas não em B
+- **Diferença (B - A)**: elementos que estão em B mas não em A
+- **Diferença Simétrica (A ∆ B)**: elementos que estão em A ou B, mas não em ambos
+
+### Como usar:
+Informe os elementos separados por vírgula (ex.: `1, 2, 3`) e escolha a operação desejada.
+
+## Domínio e Imagem
+
+A tela exibe um gráfico cartesiano interativo que representa visualmente as regiões de domínio (eixo x) e imagem (eixo y).
+
+### Como usar:
+1. Informe o intervalo mínimo e máximo para x (domínio)
+2. Informe o intervalo mínimo e máximo para y (imagem)
+3. Escolha se cada limite é aberto (< >) ou fechado (≤ ≥)
+4. Clique em **Gerar** para visualizar no gráfico
+
+O resultado mostra a notação de conjuntos (ex.: `{x ∈ ℝ | -2 ≤ x ≤ 3}`) e uma representação visual em cores.
+
+## Histórico de cálculos
+
+A aba **Histórico** registra automaticamente todos os cálculos realizados durante a sessão. Você pode:
+- Consultar operações anteriores
+- Limpar o histórico quando necessário
 
 ## Requisitos do projeto
 

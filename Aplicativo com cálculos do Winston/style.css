@@ -60,6 +60,18 @@ body {
   color: var(--muted);
 }
 
+.subtitle a {
+  color: var(--accent-2);
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.subtitle a:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
 .active-module {
   margin: 0;
   display: inline-flex;

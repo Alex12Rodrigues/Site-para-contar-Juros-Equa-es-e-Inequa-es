@@ -3,12 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="expires" content="0">
   <title>Calculadora Matemática do Winston</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=20260408-cart">
   <script>
+    // Auto-refresh on version change
+    (function() {
+      const v = "20260408-cart";
+      const last = localStorage.getItem("appV");
+      if (last && last !== v) {
+        localStorage.setItem("appV", v);
+        window.location.reload(true);
+      }
+      localStorage.setItem("appV", v);
+    })();
+
     window.aplicarExemplo = function(kind, example) {
       const presets = {
         "composto:investimento": {
@@ -91,7 +105,7 @@
     <header class="hero">
       <p class="eyebrow">Matemática aplicada</p>
       <h1>Aplicativo com cálculos do Winston.</h1>
-      <p class="subtitle">Ferramenta rápida para juros, equações e inequações de 1º e 2º grau.</p>
+      <p class="subtitle"><a href="https://github.com/Alex12Rodrigues/Site-para-contar-Juros-Equa-es-e-Inequa-es" target="_blank">GitHub · Ver repositório</a></p>
       <p class="active-module">Módulo ativo: <strong id="moduloAtivo">Juros Compostos</strong></p>
     </header>
 
@@ -436,6 +450,6 @@
     </section>
   </main>
 
-  <script src="script.js"></script>
+  <script src="script.js?v=20260408-cart"></script>
 </body>
 </html>
