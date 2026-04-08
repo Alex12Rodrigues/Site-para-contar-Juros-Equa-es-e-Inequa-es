@@ -6,7 +6,7 @@ O objetivo do projeto é deixar os cálculos mais simples de entender, com uma i
 
 ## Acesso online
 
-- Site publicado no InfinityFree: https://appdowinston.gamer.gd/
+- Site publicado no InfinityFree: <a href="https://appdowinston.gamer.gd/" target="_blank" rel="noopener noreferrer">https://appdowinston.gamer.gd/</a>
 
 ## Índice
 
