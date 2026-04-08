@@ -270,7 +270,7 @@ function preencherExemplo(kind, example) {
     byId("taxaCompostaUnidade").value = "mes";
     byId("tempoComposto").value = "12";
     byId("tempoCompostoUnidade").value = "mes";
-    atualizarExplicacaoJuros("composto");
+    byId("capitalComposto").dispatchEvent(new Event("change", { bubbles: true }));
     return;
   }
 
@@ -280,7 +280,7 @@ function preencherExemplo(kind, example) {
     byId("taxaCompostaUnidade").value = "dia";
     byId("tempoComposto").value = "45";
     byId("tempoCompostoUnidade").value = "dia";
-    atualizarExplicacaoJuros("composto");
+    byId("capitalComposto").dispatchEvent(new Event("change", { bubbles: true }));
     return;
   }
 
@@ -812,17 +812,7 @@ document.addEventListener("click", (event) => {
   aplicarExemplo(button.dataset.kind, button.dataset.example);
 });
 
-document.querySelectorAll('.example-btn[data-kind="composto"]').forEach((button) => {
-  button.addEventListener("click", () => {
-    aplicarExemplo("composto", button.dataset.example);
 
-    const saida = byId("explicaComposto");
-
-    if (saida && saida.textContent.startsWith("Preencha")) {
-      aplicarTextoExemplo("composto", button.dataset.example);
-    }
-  });
-});
 
 ["capitalComposto", "taxaComposta", "tempoComposto", "taxaCompostaUnidade", "tempoCompostoUnidade"].forEach((id) => {
   byId(id).addEventListener("input", () => {
