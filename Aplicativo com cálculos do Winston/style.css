@@ -138,9 +138,13 @@ body {
 
 .interest-layout {
   display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
+  grid-template-columns: minmax(0, 1.7fr) minmax(300px, 1fr);
   gap: 16px;
   align-items: start;
+}
+
+.interest-layout > div {
+  min-width: 0;
 }
 
 .formula-card {
@@ -148,6 +152,10 @@ body {
   border-radius: 14px;
   padding: 14px;
   background: #fff;
+  box-shadow: 0 12px 28px rgba(20, 33, 61, 0.06);
+  align-self: start;
+  position: sticky;
+  top: 16px;
 }
 
 .formula-title {
@@ -235,6 +243,10 @@ input {
   padding: 11px;
   font: inherit;
   background: #fff;
+  width: 100%;
+  min-height: 54px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  box-shadow: inset 0 1px 0 rgba(20, 33, 61, 0.04);
 }
 
 select {
@@ -243,16 +255,27 @@ select {
   padding: 11px;
   font: inherit;
   background: #fff;
+  width: 100%;
+  min-height: 54px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  box-shadow: inset 0 1px 0 rgba(20, 33, 61, 0.04);
+}
+
+input:hover,
+select:hover {
+  border-color: #c8baa3;
 }
 
 input:focus {
   outline: 2px solid rgba(0, 159, 183, 0.24);
   border-color: var(--accent-2);
+  box-shadow: 0 0 0 3px rgba(0, 159, 183, 0.1);
 }
 
 select:focus {
   outline: 2px solid rgba(0, 159, 183, 0.24);
   border-color: var(--accent-2);
+  box-shadow: 0 0 0 3px rgba(0, 159, 183, 0.1);
 }
 
 .action {
@@ -302,12 +325,50 @@ select:focus {
   font-family: "IBM Plex Mono", monospace;
   font-size: 0.95rem;
   line-height: 1.45;
+  white-space: normal;
+  word-break: break-word;
 }
 
 .result.error {
   color: var(--warn);
   border-color: #e8b9a8;
   background: #fff8f5;
+}
+
+.history-box {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  padding: 10px 12px;
+  max-height: 340px;
+  overflow: auto;
+}
+
+.history-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+
+.history-item {
+  border: 1px solid #e9dece;
+  border-radius: 8px;
+  background: #fffdf8;
+  padding: 8px 10px;
+  color: var(--ink);
+  font-size: 0.9rem;
+  line-height: 1.35;
+}
+
+.history-empty {
+  border: 1px dashed #d7c9b6;
+  border-radius: 8px;
+  background: #fff;
+  padding: 10px;
+  color: var(--muted);
+  font-size: 0.9rem;
 }
 
 @keyframes reveal {
@@ -345,8 +406,13 @@ select:focus {
   }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 980px) {
   .interest-layout {
     grid-template-columns: 1fr;
+  }
+
+  .formula-card {
+    position: static;
+    box-shadow: none;
   }
 }

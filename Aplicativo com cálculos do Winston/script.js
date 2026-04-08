@@ -8,8 +8,13 @@ const calculatorsByPanel = {
   "equacao-primeiro": resolverEquacaoPrimeiro,
   "equacao-segundo": resolverEquacaoSegundo,
   "inequacao-primeiro": resolverInequacaoPrimeiro,
-  "inequacao-segundo": resolverInequacaoSegundo
+  "inequacao-segundo": resolverInequacaoSegundo,
+  "conjuntos": calcularConjuntos,
+  "dominio-imagem": gerarDominioImagem
 };
+
+const HISTORY_KEY = "winston_calculos_historico";
+let historicoCalculos = [];
 
 function showPanel(panelId) {
   panels.forEach((panel) => {
@@ -88,6 +93,68 @@ function print(targetId, message) {
   } else {
     output.classList.remove("error");
   }
+}
+
+function addHistoryEntry(modulo, descricao) {
+  historicoCalculos.unshift({
+    modulo,
+    descricao,
+    quando: new Date().toLocaleString("pt-BR")
+  });
+
+  historicoCalculos = historicoCalculos.slice(0, 50);
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(historicoCalculos));
+  renderHistorico();
+}
+
+function renderHistorico() {
+  const list = byId("historicoLista");
+
+  if (!list) {
+    return;
+  }
+
+  list.innerHTML = "";
+
+  if (historicoCalculos.length === 0) {
+    const emptyItem = document.createElement("li");
+    emptyItem.className = "history-empty";
+    emptyItem.textContent = "Ainda não há contas registradas.";
+    list.appendChild(emptyItem);
+    return;
+  }
+
+  historicoCalculos.forEach((item) => {
+    const li = document.createElement("li");
+    li.className = "history-item";
+    li.textContent = `[${item.quando}] ${item.modulo}: ${item.descricao}`;
+    list.appendChild(li);
+  });
+}
+
+function loadHistorico() {
+  const raw = localStorage.getItem(HISTORY_KEY);
+
+  if (!raw) {
+    historicoCalculos = [];
+    renderHistorico();
+    return;
+  }
+
+  try {
+    const parsed = JSON.parse(raw);
+    historicoCalculos = Array.isArray(parsed) ? parsed : [];
+  } catch {
+    historicoCalculos = [];
+  }
+
+  renderHistorico();
+}
+
+function limparHistorico() {
+  historicoCalculos = [];
+  localStorage.removeItem(HISTORY_KEY);
+  renderHistorico();
 }
 
 function isInvalidNumber(value) {
@@ -234,11 +301,142 @@ function preencherExemplo(kind, example) {
     byId("tempoSimples").value = "1";
     byId("tempoSimplesUnidade").value = "ano";
     atualizarExplicacaoJuros("simples");
+    return;
+  }
+
+  if (kind === "eq1" && example === "basico") {
+    byId("eq1a").value = "3";
+    byId("eq1b").value = "-9";
+    return;
+  }
+
+  if (kind === "eq1" && example === "negativo") {
+    byId("eq1a").value = "-2";
+    byId("eq1b").value = "8";
+    return;
+  }
+
+  if (kind === "eq2" && example === "duas-raizes") {
+    byId("eq2a").value = "1";
+    byId("eq2b").value = "-5";
+    byId("eq2c").value = "6";
+    return;
+  }
+
+  if (kind === "eq2" && example === "raiz-dupla") {
+    byId("eq2a").value = "1";
+    byId("eq2b").value = "-4";
+    byId("eq2c").value = "4";
+    return;
+  }
+
+  if (kind === "ineq1" && example === "positivo") {
+    byId("ineq1a").value = "2";
+    byId("ineq1b").value = "-6";
+    return;
+  }
+
+  if (kind === "ineq1" && example === "negativo") {
+    byId("ineq1a").value = "-3";
+    byId("ineq1b").value = "9";
+    return;
+  }
+
+  if (kind === "ineq2" && example === "aberta") {
+    byId("ineq2a").value = "1";
+    byId("ineq2b").value = "-3";
+    byId("ineq2c").value = "-4";
+    return;
+  }
+
+  if (kind === "ineq2" && example === "fechada") {
+    byId("ineq2a").value = "-1";
+    byId("ineq2b").value = "5";
+    byId("ineq2c").value = "-6";
+    return;
+  }
+
+  if (kind === "conjuntos" && example === "uniao") {
+    byId("setA").value = "1, 2, 3";
+    byId("setB").value = "3, 4, 5";
+    byId("setOperacao").value = "uniao";
+    return;
+  }
+
+  if (kind === "conjuntos" && example === "intersecao") {
+    byId("setA").value = "a, b, c";
+    byId("setB").value = "b, c, d";
+    byId("setOperacao").value = "intersecao";
+    return;
+  }
+
+  if (kind === "dominio" && example === "intervalo1") {
+    byId("domXMin").value = "-2";
+    byId("domXCompEsq").value = "<=";
+    byId("domXCompDir").value = "<=";
+    byId("domXMax").value = "3";
+    byId("domYMin").value = "-1";
+    byId("domYCompEsq").value = "<=";
+    byId("domYCompDir").value = "<=";
+    byId("domYMax").value = "4";
+    return;
+  }
+
+  if (kind === "dominio" && example === "intervalo2") {
+    byId("domXMin").value = "0";
+    byId("domXCompEsq").value = "<";
+    byId("domXCompDir").value = "<=";
+    byId("domXMax").value = "5";
+    byId("domYMin").value = "-2";
+    byId("domYCompEsq").value = "<=";
+    byId("domYCompDir").value = "<";
+    byId("domYMax").value = "2";
+  }
+}
+
+function aplicarTextoExemplo(kind, example) {
+  const textos = {
+    "composto:investimento": "Você investe R$ 2.500,00 com taxa de 1,2% por mês, durante 12 meses. Isso equivale a 12 período(s) da taxa, com capitalização.",
+    "composto:curto": "Você investe R$ 1.500,00 com taxa de 0,15% por dia, durante 45 dias. Isso equivale a 45 período(s) da taxa, com capitalização.",
+    "simples:emprestimo": "Você investe R$ 1.800,00 com taxa de 2% por mês, durante 6 meses. Isso equivale a 6 período(s) da taxa, com acréscimo linear.",
+    "simples:anual": "Você investe R$ 5.000,00 com taxa de 10% por ano, durante 1 ano. Isso equivale a 1 período(s) da taxa, com acréscimo linear.",
+    "eq1:basico": "Exemplo carregado: 3x - 9 = 0. Ao resolver, você encontra x = 3.",
+    "eq1:negativo": "Exemplo carregado: -2x + 8 = 0. Ao resolver, você encontra x = 4.",
+    "eq2:duas-raizes": "Exemplo carregado: x² - 5x + 6 = 0. Delta positivo, com duas raízes reais.",
+    "eq2:raiz-dupla": "Exemplo carregado: x² - 4x + 4 = 0. Delta zero, com raiz real dupla.",
+    "ineq1:positivo": "Exemplo carregado: 2x - 6 > 0. Como a é positivo, a solução fica x > 3.",
+    "ineq1:negativo": "Exemplo carregado: -3x + 9 > 0. Como a é negativo, o sinal inverte e a solução fica x < 3.",
+    "ineq2:aberta": "Exemplo carregado: x² - 3x - 4 > 0. A parábola abre para cima e gera solução fora das raízes.",
+    "ineq2:fechada": "Exemplo carregado: -x² + 5x - 6 > 0. A parábola abre para baixo e gera solução entre as raízes.",
+    "conjuntos:uniao": "Exemplo carregado para união: A={1, 2, 3} e B={3, 4, 5}.",
+    "conjuntos:intersecao": "Exemplo carregado para interseção: A={a, b, c} e B={b, c, d}.",
+    "dominio:intervalo1": "Exemplo carregado: domínio e imagem com limites fechados (incluem os extremos).",
+    "dominio:intervalo2": "Exemplo carregado: domínio e imagem com limites mistos (abertos e fechados)."
+  };
+
+  const alvoPorTipo = {
+    composto: "explicaComposto",
+    simples: "explicaSimples",
+    eq1: "explicaEq1",
+    eq2: "explicaEq2",
+    ineq1: "explicaIneq1",
+    ineq2: "explicaIneq2",
+    conjuntos: "explicaConjuntos",
+    dominio: "explicaDominio"
+  };
+
+  const alvoId = alvoPorTipo[kind];
+  const saida = byId(alvoId);
+  const texto = textos[`${kind}:${example}`];
+
+  if (saida && texto) {
+    saida.textContent = texto;
   }
 }
 
 function aplicarExemplo(kind, example) {
   preencherExemplo(kind, example);
+  aplicarTextoExemplo(kind, example);
 }
 
 window.aplicarExemplo = aplicarExemplo;
@@ -273,6 +471,11 @@ function calcularJurosCompostos() {
     "saidaComposto",
     `Períodos equivalentes: ${formatNumber(periodos, 4)} | Juros: ${money(juros)} | Montante: ${money(montante)}`
   );
+
+  addHistoryEntry(
+    "Juros Compostos",
+    `Capital ${money(capital)}, taxa ${formatNumber(taxa * 100, 4)}%, tempo ${formatNumber(tempo, 4)} (${tempoUnidade}) -> Montante ${money(montante)}`
+  );
 }
 
 function calcularJurosSimples() {
@@ -305,6 +508,11 @@ function calcularJurosSimples() {
     "saidaSimples",
     `Períodos equivalentes: ${formatNumber(periodos, 4)} | Juros: ${money(juros)} | Montante: ${money(montante)}`
   );
+
+  addHistoryEntry(
+    "Juros Simples",
+    `Capital ${money(capital)}, taxa ${formatNumber(taxa * 100, 4)}%, tempo ${formatNumber(tempo, 4)} (${tempoUnidade}) -> Montante ${money(montante)}`
+  );
 }
 
 function resolverEquacaoPrimeiro() {
@@ -319,6 +527,7 @@ function resolverEquacaoPrimeiro() {
 
   const x = -b / a;
   print("saidaEq1", `Solução: x = ${formatNumber(x)}`);
+  addHistoryEntry("Equação 1º", `a=${formatNumber(a)}, b=${formatNumber(b)} -> x=${formatNumber(x)}`);
 }
 
 function resolverEquacaoSegundo() {
@@ -347,6 +556,11 @@ function resolverEquacaoSegundo() {
     "saidaEq2",
     `Delta = ${formatNumber(deltaCorrigido)} | x1 = ${formatNumber(x1, 4)} | x2 = ${formatNumber(x2, 4)}`
   );
+
+  addHistoryEntry(
+    "Equação 2º",
+    `a=${formatNumber(a)}, b=${formatNumber(b)}, c=${formatNumber(c)} -> x1=${formatNumber(x1, 4)}, x2=${formatNumber(x2, 4)}`
+  );
 }
 
 function resolverInequacaoPrimeiro() {
@@ -363,6 +577,7 @@ function resolverInequacaoPrimeiro() {
   const sinal = a > 0 ? ">" : "<";
 
   print("saidaIneq1", `Solução: x ${sinal} ${formatNumber(limite, 4)}`);
+  addHistoryEntry("Inequação 1º", `a=${formatNumber(a)}, b=${formatNumber(b)} -> x ${sinal} ${formatNumber(limite, 4)}`);
 }
 
 function resolverInequacaoSegundo() {
@@ -380,10 +595,15 @@ function resolverInequacaoSegundo() {
   const deltaCorrigido = Math.abs(delta) < epsilon ? 0 : delta;
 
   if (deltaCorrigido < 0) {
+    const mensagem =
+      a > 0 ? "Solução: todos os valores reais." : "Solução: conjunto vazio.";
+
     print(
       "saidaIneq2",
-      a > 0 ? "Solução: todos os valores reais." : "Solução: conjunto vazio."
+      mensagem
     );
+
+    addHistoryEntry("Inequação 2º", `a=${formatNumber(a)}, b=${formatNumber(b)}, c=${formatNumber(c)} -> ${mensagem}`);
     return;
   }
 
@@ -392,24 +612,143 @@ function resolverInequacaoSegundo() {
 
   if (deltaCorrigido === 0) {
     if (a > 0) {
-      print("saidaIneq2", `Solução: x ≠ ${formatNumber(raiz1, 4)}.`);
+      const mensagem = `Solução: x ≠ ${formatNumber(raiz1, 4)}.`;
+      print("saidaIneq2", mensagem);
+      addHistoryEntry("Inequação 2º", `a=${formatNumber(a)}, b=${formatNumber(b)}, c=${formatNumber(c)} -> ${mensagem}`);
     } else {
-      print("saidaIneq2", "Solução: conjunto vazio.");
+      const mensagem = "Solução: conjunto vazio.";
+      print("saidaIneq2", mensagem);
+      addHistoryEntry("Inequação 2º", `a=${formatNumber(a)}, b=${formatNumber(b)}, c=${formatNumber(c)} -> ${mensagem}`);
     }
     return;
   }
 
   if (a > 0) {
+    const mensagem =
+      `Solução: x < ${formatNumber(raiz1, 4)} ou x > ${formatNumber(raiz2, 4)}.`;
+
     print(
       "saidaIneq2",
-      `Solução: x < ${formatNumber(raiz1, 4)} ou x > ${formatNumber(raiz2, 4)}.`
+      mensagem
     );
+
+    addHistoryEntry("Inequação 2º", `a=${formatNumber(a)}, b=${formatNumber(b)}, c=${formatNumber(c)} -> ${mensagem}`);
   } else {
+    const mensagem =
+      `Solução: ${formatNumber(raiz1, 4)} < x < ${formatNumber(raiz2, 4)}.`;
+
     print(
       "saidaIneq2",
-      `Solução: ${formatNumber(raiz1, 4)} < x < ${formatNumber(raiz2, 4)}.`
+      mensagem
     );
+
+    addHistoryEntry("Inequação 2º", `a=${formatNumber(a)}, b=${formatNumber(b)}, c=${formatNumber(c)} -> ${mensagem}`);
   }
+}
+
+function parseSetMembers(raw) {
+  const parts = raw
+    .split(/[,;]+/)
+    .map((item) => item.trim())
+    .filter((item) => item !== "");
+
+  return [...new Set(parts)];
+}
+
+function formatSet(values) {
+  return `{${values.join(", ")}}`;
+}
+
+function calcularConjuntos() {
+  const a = parseSetMembers(toText("setA"));
+  const b = parseSetMembers(toText("setB"));
+  const operacao = toText("setOperacao");
+
+  if (a.length === 0 || b.length === 0) {
+    print("saidaConjuntos", "Informe elementos válidos para A e B.");
+    return;
+  }
+
+  const setB = new Set(b);
+  const setA = new Set(a);
+  let resultado = [];
+  let nomeOperacao = "";
+
+  if (operacao === "uniao") {
+    resultado = [...new Set([...a, ...b])];
+    nomeOperacao = "A ∪ B";
+  }
+
+  if (operacao === "intersecao") {
+    resultado = a.filter((item) => setB.has(item));
+    nomeOperacao = "A ∩ B";
+  }
+
+  if (operacao === "diferencaAB") {
+    resultado = a.filter((item) => !setB.has(item));
+    nomeOperacao = "A - B";
+  }
+
+  if (operacao === "diferencaBA") {
+    resultado = b.filter((item) => !setA.has(item));
+    nomeOperacao = "B - A";
+  }
+
+  if (operacao === "simetrica") {
+    resultado = [...a.filter((item) => !setB.has(item)), ...b.filter((item) => !setA.has(item))];
+    nomeOperacao = "A △ B";
+  }
+
+  const saida = `${nomeOperacao} = ${formatSet(resultado)}`;
+  print("saidaConjuntos", saida);
+  addHistoryEntry("Conjuntos", `A=${formatSet(a)}, B=${formatSet(b)} -> ${saida}`);
+}
+
+function formatIntervalCondition(symbol, min, max, leftOp, rightOp) {
+  const minFmt = formatNumber(min, 4);
+  const maxFmt = formatNumber(max, 4);
+
+  if (Math.abs(min - max) < 1e-10) {
+    if (leftOp === "<=" && rightOp === "<=") {
+      return `${symbol} = ${minFmt}`;
+    }
+
+    return "vazio";
+  }
+
+  return `${minFmt} ${leftOp} ${symbol} ${rightOp} ${maxFmt}`;
+}
+
+function gerarDominioImagem() {
+  const xMin = toNumber("domXMin");
+  const xMax = toNumber("domXMax");
+  const yMin = toNumber("domYMin");
+  const yMax = toNumber("domYMax");
+
+  if ([xMin, xMax, yMin, yMax].some(isInvalidNumber)) {
+    print("saidaDominioImagem", "Informe valores válidos para x e y.");
+    return;
+  }
+
+  if (xMin > xMax || yMin > yMax) {
+    print("saidaDominioImagem", "O valor mínimo não pode ser maior que o máximo.");
+    return;
+  }
+
+  const xLeft = toText("domXCompEsq");
+  const xRight = toText("domXCompDir");
+  const yLeft = toText("domYCompEsq");
+  const yRight = toText("domYCompDir");
+
+  const xCond = formatIntervalCondition("x", xMin, xMax, xLeft, xRight);
+  const yCond = formatIntervalCondition("y", yMin, yMax, yLeft, yRight);
+
+  const dominio = xCond === "vazio" ? "D = conjunto vazio" : `D = {x ∈ R | ${xCond}}`;
+  const imagem = yCond === "vazio" ? "Im = conjunto vazio" : `Im = {y ∈ R | ${yCond}}`;
+  const saida = `${dominio} | ${imagem}`;
+
+  print("saidaDominioImagem", saida);
+  addHistoryEntry("Domínio e Imagem", saida);
 }
 
 byId("btnComposto").addEventListener("click", calcularJurosCompostos);
@@ -418,6 +757,9 @@ byId("btnEq1").addEventListener("click", resolverEquacaoPrimeiro);
 byId("btnEq2").addEventListener("click", resolverEquacaoSegundo);
 byId("btnIneq1").addEventListener("click", resolverInequacaoPrimeiro);
 byId("btnIneq2").addEventListener("click", resolverInequacaoSegundo);
+byId("btnConjuntos").addEventListener("click", calcularConjuntos);
+byId("btnDominioImagem").addEventListener("click", gerarDominioImagem);
+byId("btnLimparHistorico").addEventListener("click", limparHistorico);
 
 document.querySelectorAll(".clear-btn").forEach((button) => {
   button.addEventListener("click", () => {
@@ -442,6 +784,21 @@ document.querySelectorAll(".clear-btn").forEach((button) => {
     if (button.dataset.panel === "juros-simples") {
       atualizarExplicacaoJuros("simples");
     }
+
+    const explicacoesPadrao = {
+      "equacao-primeiro": "explicaEq1",
+      "equacao-segundo": "explicaEq2",
+      "inequacao-primeiro": "explicaIneq1",
+      "inequacao-segundo": "explicaIneq2",
+      conjuntos: "explicaConjuntos",
+      "dominio-imagem": "explicaDominio"
+    };
+
+    const explicacaoId = explicacoesPadrao[button.dataset.panel];
+
+    if (explicacaoId && byId(explicacaoId)) {
+      byId(explicacaoId).textContent = "Preencha os campos para visualizar o cenário antes de calcular.";
+    }
   });
 });
 
@@ -452,7 +809,19 @@ document.addEventListener("click", (event) => {
     return;
   }
 
-  preencherExemplo(button.dataset.kind, button.dataset.example);
+  aplicarExemplo(button.dataset.kind, button.dataset.example);
+});
+
+document.querySelectorAll('.example-btn[data-kind="composto"]').forEach((button) => {
+  button.addEventListener("click", () => {
+    aplicarExemplo("composto", button.dataset.example);
+
+    const saida = byId("explicaComposto");
+
+    if (saida && saida.textContent.startsWith("Preencha")) {
+      aplicarTextoExemplo("composto", button.dataset.example);
+    }
+  });
 });
 
 ["capitalComposto", "taxaComposta", "tempoComposto", "taxaCompostaUnidade", "tempoCompostoUnidade"].forEach((id) => {
@@ -493,3 +862,4 @@ document.querySelectorAll(".panel input, .panel select").forEach((field) => {
 showPanel("juros-compostos");
 atualizarExplicacaoJuros("composto");
 atualizarExplicacaoJuros("simples");
+loadHistorico();
