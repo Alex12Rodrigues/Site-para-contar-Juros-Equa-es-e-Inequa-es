@@ -253,14 +253,36 @@ function toFixedNumber(value, decimals = 2) {
   return Number.parseFloat(value.toFixed(decimals));
 }
 
+function isDarkTheme() {
+  return document.body.classList.contains("dark-mode");
+}
+
+function getChartPalette() {
+  if (isDarkTheme()) {
+    return {
+      label: "#d7e3f3",
+      grid: "rgba(232,238,245,0.24)",
+      axis: "rgba(255,255,255,0.78)",
+      curve: "#9db8ff"
+    };
+  }
+
+  return {
+    label: "#54627a",
+    grid: "rgba(84,98,122,0.15)",
+    axis: "rgba(20,33,61,0.5)",
+    curve: "#1f2d4d"
+  };
+}
+
 function svgHeader(width, height) {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="100%" height="${height}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Gráfico matemático" style="display:block; max-width:100%;">`;
 }
 
-function createAxisLabels(width, height, xLabel, yLabel) {
+function createAxisLabels(width, height, xLabel, yLabel, labelColor = "#54627a") {
   return `
-    <text x="${width - 18}" y="${height - 12}" text-anchor="end" font-size="12" fill="#54627a">${xLabel}</text>
-    <text x="18" y="18" text-anchor="start" font-size="12" fill="#54627a">${yLabel}</text>`;
+    <text x="${width - 18}" y="${height - 12}" text-anchor="end" font-size="12" fill="${labelColor}">${xLabel}</text>
+    <text x="18" y="18" text-anchor="start" font-size="12" fill="${labelColor}">${yLabel}</text>`;
 }
 
 function createLinePath(points, toX, toY) {
@@ -272,6 +294,7 @@ function createCircle(cx, cy, color = "#ff7a30", radius = 4) {
 }
 
 function criarGraficoJuros(capital, taxaPercentual, tempo, isComposto) {
+  const palette = getChartPalette();
   const taxa = taxaPercentual / 100;
   const samples = Math.max(20, Math.ceil(tempo * 12));
   const xMax = Math.max(tempo, 1);
@@ -306,30 +329,31 @@ function criarGraficoJuros(capital, taxaPercentual, tempo, isComposto) {
   for (let step = 0; step <= 5; step += 1) {
     const x = paddingLeft + (graphWidth * step) / 5;
     const value = (xMax * step) / 5;
-    svg += `<line x1="${x}" y1="${paddingTop}" x2="${x}" y2="${height - paddingBottom}" stroke="rgba(84,98,122,0.15)" stroke-width="1" />`;
-    svg += `<text x="${x}" y="${height - 22}" text-anchor="middle" font-size="11" fill="#54627a">${formatNumber(value, 1)}</text>`;
+    svg += `<line x1="${x}" y1="${paddingTop}" x2="${x}" y2="${height - paddingBottom}" stroke="${palette.grid}" stroke-width="1" />`;
+    svg += `<text x="${x}" y="${height - 22}" text-anchor="middle" font-size="11" fill="${palette.label}">${formatNumber(value, 1)}</text>`;
   }
 
   for (let step = 0; step <= 4; step += 1) {
     const y = paddingTop + (graphHeight * step) / 4;
     const value = maxY - ((maxY - minY) * step) / 4;
-    svg += `<line x1="${paddingLeft}" y1="${y}" x2="${width - paddingRight}" y2="${y}" stroke="rgba(84,98,122,0.15)" stroke-width="1" />`;
-    svg += `<text x="${paddingLeft - 10}" y="${y + 4}" text-anchor="end" font-size="11" fill="#54627a">${money(value)}</text>`;
+    svg += `<line x1="${paddingLeft}" y1="${y}" x2="${width - paddingRight}" y2="${y}" stroke="${palette.grid}" stroke-width="1" />`;
+    svg += `<text x="${paddingLeft - 10}" y="${y + 4}" text-anchor="end" font-size="11" fill="${palette.label}">${money(value)}</text>`;
   }
 
-  svg += `<line x1="${paddingLeft}" y1="${toY(0)}" x2="${width - paddingRight}" y2="${toY(0)}" stroke="rgba(20,33,61,0.5)" stroke-width="2" />`;
-  svg += `<line x1="${paddingLeft}" y1="${paddingTop}" x2="${paddingLeft}" y2="${height - paddingBottom}" stroke="rgba(20,33,61,0.5)" stroke-width="2" />`;
+  svg += `<line x1="${paddingLeft}" y1="${toY(0)}" x2="${width - paddingRight}" y2="${toY(0)}" stroke="${palette.axis}" stroke-width="2" />`;
+  svg += `<line x1="${paddingLeft}" y1="${paddingTop}" x2="${paddingLeft}" y2="${height - paddingBottom}" stroke="${palette.axis}" stroke-width="2" />`;
   svg += `<path d="${path}" fill="none" stroke="#ff7a30" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />`;
   svg += createCircle(toX(0), toY(capital), "#009fb7", 5);
   svg += createCircle(toX(finalPoint.x), toY(finalPoint.y), "#ff7a30", 5);
-  svg += `<text x="${width - paddingRight - 6}" y="${toY(finalPoint.y) - 12}" text-anchor="end" font-size="12" fill="#1f2d4d">${money(finalPoint.y)}</text>`;
-  svg += createAxisLabels(width, height, "Tempo", "Montante");
+  svg += `<text x="${width - paddingRight - 6}" y="${toY(finalPoint.y) - 12}" text-anchor="end" font-size="12" fill="${palette.label}">${money(finalPoint.y)}</text>`;
+  svg += createAxisLabels(width, height, "Tempo", "Montante", palette.label);
   svg += `</svg>`;
 
   return `<div class="graph-block"><div class="graph-title">${finalText}</div>${svg}</div>`;
 }
 
 function criarGraficoParabola(a, b, c, options = {}) {
+  const palette = getChartPalette();
   const epsilon = 1e-10;
   const delta = b * b - 4 * a * c;
   const deltaCorrigido = Math.abs(delta) < epsilon ? 0 : delta;
@@ -374,23 +398,23 @@ function criarGraficoParabola(a, b, c, options = {}) {
   for (let step = 0; step <= 6; step += 1) {
     const x = paddingLeft + (graphWidth * step) / 6;
     const value = xMin + ((xMax - xMin) * step) / 6;
-    svg += `<line x1="${x}" y1="${paddingTop}" x2="${x}" y2="${height - paddingBottom}" stroke="rgba(84,98,122,0.15)" stroke-width="1" />`;
-    svg += `<text x="${x}" y="${height - 20}" text-anchor="middle" font-size="11" fill="#54627a">${formatNumber(value, 2)}</text>`;
+    svg += `<line x1="${x}" y1="${paddingTop}" x2="${x}" y2="${height - paddingBottom}" stroke="${palette.grid}" stroke-width="1" />`;
+    svg += `<text x="${x}" y="${height - 20}" text-anchor="middle" font-size="11" fill="${palette.label}">${formatNumber(value, 2)}</text>`;
   }
 
   for (let step = 0; step <= 4; step += 1) {
     const y = paddingTop + (graphHeight * step) / 4;
     const value = yMax - ((yMax - yMin) * step) / 4;
-    svg += `<line x1="${paddingLeft}" y1="${y}" x2="${width - paddingRight}" y2="${y}" stroke="rgba(84,98,122,0.15)" stroke-width="1" />`;
-    svg += `<text x="${paddingLeft - 10}" y="${y + 4}" text-anchor="end" font-size="11" fill="#54627a">${formatNumber(value, 2)}</text>`;
+    svg += `<line x1="${paddingLeft}" y1="${y}" x2="${width - paddingRight}" y2="${y}" stroke="${palette.grid}" stroke-width="1" />`;
+    svg += `<text x="${paddingLeft - 10}" y="${y + 4}" text-anchor="end" font-size="11" fill="${palette.label}">${formatNumber(value, 2)}</text>`;
   }
 
   if (zeroY >= paddingTop && zeroY <= height - paddingBottom) {
-    svg += `<line x1="${paddingLeft}" y1="${zeroY}" x2="${width - paddingRight}" y2="${zeroY}" stroke="rgba(20,33,61,0.5)" stroke-width="2" />`;
+    svg += `<line x1="${paddingLeft}" y1="${zeroY}" x2="${width - paddingRight}" y2="${zeroY}" stroke="${palette.axis}" stroke-width="2" />`;
   }
 
-  svg += `<line x1="${paddingLeft}" y1="${paddingTop}" x2="${paddingLeft}" y2="${height - paddingBottom}" stroke="rgba(20,33,61,0.5)" stroke-width="2" />`;
-  svg += `<path d="${path}" fill="none" stroke="#1f2d4d" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />`;
+  svg += `<line x1="${paddingLeft}" y1="${paddingTop}" x2="${paddingLeft}" y2="${height - paddingBottom}" stroke="${palette.axis}" stroke-width="2" />`;
+  svg += `<path d="${path}" fill="none" stroke="${palette.curve}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />`;
 
   if (options.fillPositive) {
     const positiveSegments = [];
@@ -436,7 +460,7 @@ function criarGraficoParabola(a, b, c, options = {}) {
     svg += `<text x="${toX(highlightX)}" y="${toY(highlightY) - 12}" text-anchor="middle" font-size="11" fill="#ff7a30">f(${formatNumber(highlightX, 2)}) = ${formatNumber(highlightY, 2)}</text>`;
   }
 
-  svg += createAxisLabels(width, height, "x", "f(x)");
+  svg += createAxisLabels(width, height, "x", "f(x)", palette.label);
   svg += `</svg>`;
 
   const rootsText = deltaCorrigido >= 0
@@ -451,6 +475,7 @@ function criarGraficoJurosComparativo(tipo, capital, taxaPercentual, tempo) {
 }
 
 function criarDiagramaVenn(setA, setB, operacao) {
+  const chartPalette = getChartPalette();
   const a = [...setA];
   const b = [...setB];
   const intersecao = a.filter((item) => b.includes(item));
@@ -483,12 +508,12 @@ function criarDiagramaVenn(setA, setB, operacao) {
   let svg = svgHeader(width, height);
   svg += `<circle cx="${cx1}" cy="${cy}" r="${r}" fill="${palette.a}" stroke="${palette.line}" stroke-width="3" />`;
   svg += `<circle cx="${cx2}" cy="${cy}" r="${r}" fill="${palette.b}" stroke="${palette.line}" stroke-width="3" />`;
-  svg += `<text x="${cx1}" y="${cy - 130}" text-anchor="middle" fill="#1f2d4d" font-size="15" font-weight="700">A</text>`;
-  svg += `<text x="${cx2}" y="${cy - 130}" text-anchor="middle" fill="#1f2d4d" font-size="15" font-weight="700">B</text>`;
-  svg += `<text x="${(cx1 + cx2) / 2}" y="${cy + 6}" text-anchor="middle" fill="#1f2d4d" font-size="15" font-weight="700">A ∩ B</text>`;
-  svg += `<text x="${cx1 - 60}" y="${cy + 6}" text-anchor="middle" fill="#1f2d4d" font-size="12">${soA.length ? soA.join(", ") : "∅"}</text>`;
-  svg += `<text x="${cx2 + 60}" y="${cy + 6}" text-anchor="middle" fill="#1f2d4d" font-size="12">${soB.length ? soB.join(", ") : "∅"}</text>`;
-  svg += `<text x="360" y="290" text-anchor="middle" fill="#1f2d4d" font-size="12">${intersecao.length ? intersecao.join(", ") : "∅"}</text>`;
+  svg += `<text x="${cx1}" y="${cy - 130}" text-anchor="middle" fill="${chartPalette.label}" font-size="15" font-weight="700">A</text>`;
+  svg += `<text x="${cx2}" y="${cy - 130}" text-anchor="middle" fill="${chartPalette.label}" font-size="15" font-weight="700">B</text>`;
+  svg += `<text x="${(cx1 + cx2) / 2}" y="${cy + 6}" text-anchor="middle" fill="${chartPalette.label}" font-size="15" font-weight="700">A ∩ B</text>`;
+  svg += `<text x="${cx1 - 60}" y="${cy + 6}" text-anchor="middle" fill="${chartPalette.label}" font-size="12">${soA.length ? soA.join(", ") : "∅"}</text>`;
+  svg += `<text x="${cx2 + 60}" y="${cy + 6}" text-anchor="middle" fill="${chartPalette.label}" font-size="12">${soB.length ? soB.join(", ") : "∅"}</text>`;
+  svg += `<text x="360" y="290" text-anchor="middle" fill="${chartPalette.label}" font-size="12">${intersecao.length ? intersecao.join(", ") : "∅"}</text>`;
   svg += `</svg>`;
 
   return `<div class="graph-block"><div class="graph-title">${summary[operacao] || summary.uniao}</div>${svg}</div>`;
@@ -1056,9 +1081,10 @@ function formatIntervalCondition(symbol, min, max, leftOp, rightOp) {
 }
 
 function criarGraficoCartesiano(xMin, xMax, yMin, yMax) {
-  const padding = 40;
-  const svgWidth = 400;
-  const svgHeight = 400;
+  const palette = getChartPalette();
+  const padding = 48;
+  const svgWidth = 760;
+  const svgHeight = 360;
   const graphWidth = svgWidth - 2 * padding;
   const graphHeight = svgHeight - 2 * padding;
 
@@ -1074,38 +1100,38 @@ function criarGraficoCartesiano(xMin, xMax, yMin, yMax) {
 
   for (let x = xMin; x <= xMax; x += xStep) {
     const sx = toSvgX(x);
-    svgContent += `<line x1="${sx}" y1="${padding}" x2="${sx}" y2="${svgHeight - padding}" stroke="#e0e0e0" stroke-width="1" />`;
+    svgContent += `<line x1="${sx}" y1="${padding}" x2="${sx}" y2="${svgHeight - padding}" stroke="${palette.grid}" stroke-width="1" />`;
   }
 
   for (let y = yMin; y <= yMax; y += yStep) {
     const sy = toSvgY(y);
-    svgContent += `<line x1="${padding}" y1="${sy}" x2="${svgWidth - padding}" y2="${sy}" stroke="#e0e0e0" stroke-width="1" />`;
+    svgContent += `<line x1="${padding}" y1="${sy}" x2="${svgWidth - padding}" y2="${sy}" stroke="${palette.grid}" stroke-width="1" />`;
   }
 
   const originX = toSvgX(0);
   const originY = toSvgY(0);
 
   if (originX >= padding && originX <= svgWidth - padding) {
-    svgContent += `<line x1="${originX}" y1="${padding}" x2="${originX}" y2="${svgHeight - padding}" stroke="#333" stroke-width="2" />`;
+    svgContent += `<line x1="${originX}" y1="${padding}" x2="${originX}" y2="${svgHeight - padding}" stroke="${palette.axis}" stroke-width="2" />`;
   }
 
   if (originY >= padding && originY <= svgHeight - padding) {
-    svgContent += `<line x1="${padding}" y1="${originY}" x2="${svgWidth - padding}" y2="${originY}" stroke="#333" stroke-width="2" />`;
+    svgContent += `<line x1="${padding}" y1="${originY}" x2="${svgWidth - padding}" y2="${originY}" stroke="${palette.axis}" stroke-width="2" />`;
   }
 
-  svgContent += `<line x1="${padding}" y1="${padding}" x2="${padding}" y2="${svgHeight - padding}" stroke="#333" stroke-width="2" />`;
-  svgContent += `<line x1="${padding}" y1="${svgHeight - padding}" x2="${svgWidth - padding}" y2="${svgHeight - padding}" stroke="#333" stroke-width="2" />`;
+  svgContent += `<line x1="${padding}" y1="${padding}" x2="${padding}" y2="${svgHeight - padding}" stroke="${palette.axis}" stroke-width="2" />`;
+  svgContent += `<line x1="${padding}" y1="${svgHeight - padding}" x2="${svgWidth - padding}" y2="${svgHeight - padding}" stroke="${palette.axis}" stroke-width="2" />`;
 
   for (let x = xMin; x <= xMax; x += xStep) {
     const sx = toSvgX(x);
-    svgContent += `<line x1="${sx}" y1="${svgHeight - padding - 3}" x2="${sx}" y2="${svgHeight - padding + 3}" stroke="#666" stroke-width="1" />`;
-    svgContent += `<text x="${sx}" y="${svgHeight - padding + 15}" text-anchor="middle" font-size="12" fill="#333">${formatNumber(x, 2)}</text>`;
+    svgContent += `<line x1="${sx}" y1="${svgHeight - padding - 3}" x2="${sx}" y2="${svgHeight - padding + 3}" stroke="${palette.axis}" stroke-width="1" />`;
+    svgContent += `<text x="${sx}" y="${svgHeight - padding + 15}" text-anchor="middle" font-size="12" fill="${palette.label}">${formatNumber(x, 2)}</text>`;
   }
 
   for (let y = yMin; y <= yMax; y += yStep) {
     const sy = toSvgY(y);
-    svgContent += `<line x1="${padding - 3}" y1="${sy}" x2="${padding + 3}" y2="${sy}" stroke="#666" stroke-width="1" />`;
-    svgContent += `<text x="${padding - 10}" y="${sy + 4}" text-anchor="end" font-size="12" fill="#333">${formatNumber(y, 2)}</text>`;
+    svgContent += `<line x1="${padding - 3}" y1="${sy}" x2="${padding + 3}" y2="${sy}" stroke="${palette.axis}" stroke-width="1" />`;
+    svgContent += `<text x="${padding - 10}" y="${sy + 4}" text-anchor="end" font-size="12" fill="${palette.label}">${formatNumber(y, 2)}</text>`;
   }
 
   const points = [];
@@ -1124,8 +1150,8 @@ function criarGraficoCartesiano(xMin, xMax, yMin, yMax) {
     svgContent += `<circle cx="${sx}" cy="${sy}" r="4" fill="#ff7a30" stroke="#fff" stroke-width="2" data-x="${formatNumber(point.x, 2)}" data-y="${formatNumber(point.y, 2)}" title="x: ${formatNumber(point.x, 2)}, y: ${formatNumber(point.y, 2)}" />`;
   });
 
-  svgContent += `<text x="${svgWidth / 2}" y="${svgHeight - 5}" text-anchor="middle" font-size="14" fill="#333">x</text>`;
-  svgContent += `<text x="15" y="${svgHeight / 2}" text-anchor="middle" font-size="14" fill="#333" transform="rotate(-90 15 ${svgHeight / 2})">y</text>`;
+  svgContent += `<text x="${svgWidth / 2}" y="${svgHeight - 5}" text-anchor="middle" font-size="14" fill="${palette.label}">x</text>`;
+  svgContent += `<text x="15" y="${svgHeight / 2}" text-anchor="middle" font-size="14" fill="${palette.label}" transform="rotate(-90 15 ${svgHeight / 2})">y</text>`;
 
   svgContent += `</svg>`;
 
