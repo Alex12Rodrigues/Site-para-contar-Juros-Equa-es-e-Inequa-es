@@ -117,6 +117,8 @@
       <button id="tab-juros-simples" class="tab-btn" data-tab="juros-simples" role="tab" aria-selected="false" aria-controls="juros-simples">Juros Simples</button>
       <button id="tab-equacao-primeiro" class="tab-btn" data-tab="equacao-primeiro" role="tab" aria-selected="false" aria-controls="equacao-primeiro">Equação 1º</button>
       <button id="tab-equacao-segundo" class="tab-btn" data-tab="equacao-segundo" role="tab" aria-selected="false" aria-controls="equacao-segundo">Equação 2º</button>
+      <button id="tab-funcao-primeiro" class="tab-btn" data-tab="funcao-primeiro" role="tab" aria-selected="false" aria-controls="funcao-primeiro">Função 1º</button>
+      <button id="tab-funcao-segundo" class="tab-btn" data-tab="funcao-segundo" role="tab" aria-selected="false" aria-controls="funcao-segundo">Função 2º</button>
       <button id="tab-inequacao-primeiro" class="tab-btn" data-tab="inequacao-primeiro" role="tab" aria-selected="false" aria-controls="inequacao-primeiro">Inequação 1º</button>
       <button id="tab-inequacao-segundo" class="tab-btn" data-tab="inequacao-segundo" role="tab" aria-selected="false" aria-controls="inequacao-segundo">Inequação 2º</button>
       <button id="tab-conjuntos" class="tab-btn" data-tab="conjuntos" role="tab" aria-selected="false" aria-controls="conjuntos">Conjuntos</button>
@@ -301,6 +303,63 @@
         <button class="ghost-action clear-btn" type="button" data-panel="equacao-segundo" data-output="saidaEq2">Limpar</button>
       </div>
       <p class="result" id="saidaEq2"></p>
+    </section>
+
+    <section id="funcao-primeiro" class="panel" aria-live="polite" role="tabpanel" aria-labelledby="tab-funcao-primeiro">
+      <h2>Função do 1º grau (f(x) = ax + b)</h2>
+      <p class="panel-note">Informe os coeficientes e o valor de x para calcular a imagem da função.</p>
+      <div class="grid-inputs">
+        <label>Coeficiente a
+          <input type="number" id="func1a" placeholder="Ex.: 3" step="any" inputmode="decimal">
+        </label>
+        <label>Coeficiente b
+          <input type="number" id="func1b" placeholder="Ex.: -9" step="any" inputmode="decimal">
+        </label>
+        <label>Valor de x
+          <input type="number" id="func1x" placeholder="Ex.: 2" step="any" inputmode="decimal">
+        </label>
+      </div>
+      <div class="quick-examples" aria-label="Exemplos rápidos de função do primeiro grau">
+        <span>Exemplos rápidos:</span>
+        <button type="button" class="example-btn" data-kind="func1" data-example="basico">f(x)=3x-9, x=2</button>
+        <button type="button" class="example-btn" data-kind="func1" data-example="negativo">f(x)=-2x+8, x=4</button>
+      </div>
+      <p class="live-explain" id="explicaFunc1">Preencha os campos para visualizar o valor da função antes de calcular.</p>
+      <div class="actions">
+        <button class="action" id="btnFunc1">Calcular</button>
+        <button class="ghost-action clear-btn" type="button" data-panel="funcao-primeiro" data-output="saidaFunc1">Limpar</button>
+      </div>
+      <p class="result" id="saidaFunc1"></p>
+    </section>
+
+    <section id="funcao-segundo" class="panel" aria-live="polite" role="tabpanel" aria-labelledby="tab-funcao-segundo">
+      <h2>Função do 2º grau (f(x) = ax² + bx + c)</h2>
+      <p class="panel-note">Informe os coeficientes e o valor de x para calcular a imagem da função.</p>
+      <div class="grid-inputs">
+        <label>Coeficiente a
+          <input type="number" id="func2a" placeholder="Ex.: 1" step="any" inputmode="decimal">
+        </label>
+        <label>Coeficiente b
+          <input type="number" id="func2b" placeholder="Ex.: -5" step="any" inputmode="decimal">
+        </label>
+        <label>Coeficiente c
+          <input type="number" id="func2c" placeholder="Ex.: 6" step="any" inputmode="decimal">
+        </label>
+        <label>Valor de x
+          <input type="number" id="func2x" placeholder="Ex.: 2" step="any" inputmode="decimal">
+        </label>
+      </div>
+      <div class="quick-examples" aria-label="Exemplos rápidos de função do segundo grau">
+        <span>Exemplos rápidos:</span>
+        <button type="button" class="example-btn" data-kind="func2" data-example="duas-raizes">f(x)=x²-5x+6, x=2</button>
+        <button type="button" class="example-btn" data-kind="func2" data-example="raiz-dupla">f(x)=x²-4x+4, x=3</button>
+      </div>
+      <p class="live-explain" id="explicaFunc2">Preencha os campos para visualizar o valor da função antes de calcular.</p>
+      <div class="actions">
+        <button class="action" id="btnFunc2">Calcular</button>
+        <button class="ghost-action clear-btn" type="button" data-panel="funcao-segundo" data-output="saidaFunc2">Limpar</button>
+      </div>
+      <p class="result" id="saidaFunc2"></p>
     </section>
 
     <section id="inequacao-primeiro" class="panel" aria-live="polite" role="tabpanel" aria-labelledby="tab-inequacao-primeiro">

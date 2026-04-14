@@ -32,6 +32,8 @@ const calculatorsByPanel = {
   "juros-simples": calcularJurosSimples,
   "equacao-primeiro": resolverEquacaoPrimeiro,
   "equacao-segundo": resolverEquacaoSegundo,
+  "funcao-primeiro": calcularFuncaoPrimeiro,
+  "funcao-segundo": calcularFuncaoSegundo,
   "inequacao-primeiro": resolverInequacaoPrimeiro,
   "inequacao-segundo": resolverInequacaoSegundo,
   "conjuntos": calcularConjuntos,
@@ -355,6 +357,36 @@ function preencherExemplo(kind, example) {
     return;
   }
 
+  if (kind === "func1" && example === "basico") {
+    byId("func1a").value = "3";
+    byId("func1b").value = "-9";
+    byId("func1x").value = "2";
+    return;
+  }
+
+  if (kind === "func1" && example === "negativo") {
+    byId("func1a").value = "-2";
+    byId("func1b").value = "8";
+    byId("func1x").value = "4";
+    return;
+  }
+
+  if (kind === "func2" && example === "duas-raizes") {
+    byId("func2a").value = "1";
+    byId("func2b").value = "-5";
+    byId("func2c").value = "6";
+    byId("func2x").value = "2";
+    return;
+  }
+
+  if (kind === "func2" && example === "raiz-dupla") {
+    byId("func2a").value = "1";
+    byId("func2b").value = "-4";
+    byId("func2c").value = "4";
+    byId("func2x").value = "3";
+    return;
+  }
+
   if (kind === "ineq1" && example === "positivo") {
     byId("ineq1a").value = "2";
     byId("ineq1b").value = "-6";
@@ -429,6 +461,10 @@ function aplicarTextoExemplo(kind, example) {
     "eq1:negativo": "Exemplo carregado: -2x + 8 = 0. Ao resolver, você encontra x = 4.",
     "eq2:duas-raizes": "Exemplo carregado: x² - 5x + 6 = 0. Delta positivo, com duas raízes reais.",
     "eq2:raiz-dupla": "Exemplo carregado: x² - 4x + 4 = 0. Delta zero, com raiz real dupla.",
+    "func1:basico": "Exemplo carregado: f(x) = 3x - 9, com x = 2.",
+    "func1:negativo": "Exemplo carregado: f(x) = -2x + 8, com x = 4.",
+    "func2:duas-raizes": "Exemplo carregado: f(x) = x² - 5x + 6, com x = 2.",
+    "func2:raiz-dupla": "Exemplo carregado: f(x) = x² - 4x + 4, com x = 3.",
     "ineq1:positivo": "Exemplo carregado: 2x - 6 > 0. Como a é positivo, a solução fica x > 3.",
     "ineq1:negativo": "Exemplo carregado: -3x + 9 > 0. Como a é negativo, o sinal inverte e a solução fica x < 3.",
     "ineq2:aberta": "Exemplo carregado: x² - 3x - 4 > 0. A parábola abre para cima e gera solução fora das raízes.",
@@ -444,6 +480,8 @@ function aplicarTextoExemplo(kind, example) {
     simples: "explicaSimples",
     eq1: "explicaEq1",
     eq2: "explicaEq2",
+    func1: "explicaFunc1",
+    func2: "explicaFunc2",
     ineq1: "explicaIneq1",
     ineq2: "explicaIneq2",
     conjuntos: "explicaConjuntos",
@@ -586,6 +624,37 @@ function resolverEquacaoSegundo() {
     "Equação 2º",
     `a=${formatNumber(a)}, b=${formatNumber(b)}, c=${formatNumber(c)} -> x1=${formatNumber(x1, 4)}, x2=${formatNumber(x2, 4)}`
   );
+}
+
+function calcularFuncaoPrimeiro() {
+  const a = toNumber("func1a");
+  const b = toNumber("func1b");
+  const x = toNumber("func1x");
+
+  if ([a, b, x].some(isInvalidNumber)) {
+    print("saidaFunc1", "Informe a, b e x válidos para calcular f(x).");
+    return;
+  }
+
+  const fx = a * x + b;
+  print("saidaFunc1", `f(${formatNumber(x, 4)}) = ${formatNumber(fx, 4)} | Função: f(x) = ${formatNumber(a, 4)}x + ${formatNumber(b, 4)}`);
+  addHistoryEntry("Função 1º", `f(x) = ${formatNumber(a, 4)}x + ${formatNumber(b, 4)}, x=${formatNumber(x, 4)} -> f(x)=${formatNumber(fx, 4)}`);
+}
+
+function calcularFuncaoSegundo() {
+  const a = toNumber("func2a");
+  const b = toNumber("func2b");
+  const c = toNumber("func2c");
+  const x = toNumber("func2x");
+
+  if ([a, b, c, x].some(isInvalidNumber)) {
+    print("saidaFunc2", "Informe a, b, c e x válidos para calcular f(x).");
+    return;
+  }
+
+  const fx = a * x * x + b * x + c;
+  print("saidaFunc2", `f(${formatNumber(x, 4)}) = ${formatNumber(fx, 4)} | Função: f(x) = ${formatNumber(a, 4)}x² + ${formatNumber(b, 4)}x + ${formatNumber(c, 4)}`);
+  addHistoryEntry("Função 2º", `f(x) = ${formatNumber(a, 4)}x² + ${formatNumber(b, 4)}x + ${formatNumber(c, 4)}, x=${formatNumber(x, 4)} -> f(x)=${formatNumber(fx, 4)}`);
 }
 
 function resolverInequacaoPrimeiro() {
@@ -887,6 +956,8 @@ byId("btnComposto").addEventListener("click", calcularJurosCompostos);
 byId("btnSimples").addEventListener("click", calcularJurosSimples);
 byId("btnEq1").addEventListener("click", resolverEquacaoPrimeiro);
 byId("btnEq2").addEventListener("click", resolverEquacaoSegundo);
+byId("btnFunc1").addEventListener("click", calcularFuncaoPrimeiro);
+byId("btnFunc2").addEventListener("click", calcularFuncaoSegundo);
 byId("btnIneq1").addEventListener("click", resolverInequacaoPrimeiro);
 byId("btnIneq2").addEventListener("click", resolverInequacaoSegundo);
 byId("btnConjuntos").addEventListener("click", calcularConjuntos);
@@ -917,9 +988,19 @@ document.querySelectorAll(".clear-btn").forEach((button) => {
       atualizarExplicacaoJuros("simples");
     }
 
+    if (button.dataset.panel === "funcao-primeiro" && byId("explicaFunc1")) {
+      byId("explicaFunc1").textContent = "Preencha os campos para visualizar o valor da função antes de calcular.";
+    }
+
+    if (button.dataset.panel === "funcao-segundo" && byId("explicaFunc2")) {
+      byId("explicaFunc2").textContent = "Preencha os campos para visualizar o valor da função antes de calcular.";
+    }
+
     const explicacoesPadrao = {
       "equacao-primeiro": "explicaEq1",
       "equacao-segundo": "explicaEq2",
+      "funcao-primeiro": "explicaFunc1",
+      "funcao-segundo": "explicaFunc2",
       "inequacao-primeiro": "explicaIneq1",
       "inequacao-segundo": "explicaIneq2",
       conjuntos: "explicaConjuntos",
@@ -963,6 +1044,22 @@ document.addEventListener("click", (event) => {
 
   byId(id).addEventListener("change", () => {
     atualizarExplicacaoJuros("simples");
+  });
+});
+
+["func1a", "func1b", "func1x"].forEach((id) => {
+  byId(id).addEventListener("input", () => {
+    if (byId("explicaFunc1")) {
+      byId("explicaFunc1").textContent = "Preencha os campos para visualizar o valor da função antes de calcular.";
+    }
+  });
+});
+
+["func2a", "func2b", "func2c", "func2x"].forEach((id) => {
+  byId(id).addEventListener("input", () => {
+    if (byId("explicaFunc2")) {
+      byId("explicaFunc2").textContent = "Preencha os campos para visualizar o valor da função antes de calcular.";
+    }
   });
 });
 
