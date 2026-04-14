@@ -10,11 +10,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=20260408-darkfix">
+  <link rel="stylesheet" href="style.css?v=20260414-graphfix3">
   <script>
     // Auto-refresh on version change
     (function() {
-      const v = "20260408-darkfix";
+      const v = "20260414-graphfix3";
       const last = localStorage.getItem("appV");
       if (last && last !== v) {
         localStorage.setItem("appV", v);
@@ -122,7 +122,7 @@
       <button id="tab-inequacao-primeiro" class="tab-btn" data-tab="inequacao-primeiro" role="tab" aria-selected="false" aria-controls="inequacao-primeiro">Inequação 1º</button>
       <button id="tab-inequacao-segundo" class="tab-btn" data-tab="inequacao-segundo" role="tab" aria-selected="false" aria-controls="inequacao-segundo">Inequação 2º</button>
       <button id="tab-conjuntos" class="tab-btn" data-tab="conjuntos" role="tab" aria-selected="false" aria-controls="conjuntos">Conjuntos</button>
-      <button id="tab-dominio-imagem" class="tab-btn" data-tab="dominio-imagem" role="tab" aria-selected="false" aria-controls="dominio-imagem">Domínio e Imagem</button>
+      <button id="tab-dominio-imagem" class="tab-btn" data-tab="dominio-imagem" role="tab" aria-selected="false" aria-controls="dominio-imagem">Domínio</button>
       <button id="tab-historico" class="tab-btn" data-tab="historico" role="tab" aria-selected="false" aria-controls="historico">Histórico</button>
     </nav>
 
@@ -163,8 +163,8 @@
 
           <div class="quick-examples" aria-label="Exemplos rápidos de juros compostos">
             <span>Exemplos rápidos:</span>
-            <button type="button" class="example-btn" data-kind="composto" data-example="investimento" onclick="window.aplicarExemplo('composto','investimento')">Investimento 12 meses</button>
-            <button type="button" class="example-btn" data-kind="composto" data-example="curto" onclick="window.aplicarExemplo('composto','curto')">Ciclo curto diário</button>
+            <button type="button" class="example-btn" data-kind="composto" data-example="investimento">Investimento 12 meses</button>
+            <button type="button" class="example-btn" data-kind="composto" data-example="curto">Ciclo curto diário</button>
           </div>
 
           <p class="live-explain" id="explicaComposto">Preencha os campos para visualizar o cenário antes de calcular.</p>
@@ -186,7 +186,7 @@
         <button class="action" id="btnComposto">Calcular</button>
         <button class="ghost-action clear-btn" type="button" data-panel="juros-compostos" data-output="saidaComposto">Limpar</button>
       </div>
-      <p class="result" id="saidaComposto"></p>
+      <div class="result" id="saidaComposto"></div>
     </section>
 
     <section id="juros-simples" class="panel" aria-live="polite" role="tabpanel" aria-labelledby="tab-juros-simples">
@@ -226,8 +226,8 @@
 
           <div class="quick-examples" aria-label="Exemplos rápidos de juros simples">
             <span>Exemplos rápidos:</span>
-            <button type="button" class="example-btn" data-kind="simples" data-example="emprestimo" onclick="aplicarExemplo('simples','emprestimo')">Empréstimo 6 meses</button>
-            <button type="button" class="example-btn" data-kind="simples" data-example="anual" onclick="aplicarExemplo('simples','anual')">Aplicação anual</button>
+            <button type="button" class="example-btn" data-kind="simples" data-example="emprestimo">Empréstimo 6 meses</button>
+            <button type="button" class="example-btn" data-kind="simples" data-example="anual">Aplicação anual</button>
           </div>
 
           <p class="live-explain" id="explicaSimples">Preencha os campos para visualizar o cenário antes de calcular.</p>
@@ -251,7 +251,7 @@
         <button class="action" id="btnSimples">Calcular</button>
         <button class="ghost-action clear-btn" type="button" data-panel="juros-simples" data-output="saidaSimples">Limpar</button>
       </div>
-      <p class="result" id="saidaSimples"></p>
+      <div class="result" id="saidaSimples"></div>
     </section>
 
     <section id="equacao-primeiro" class="panel" aria-live="polite" role="tabpanel" aria-labelledby="tab-equacao-primeiro">
@@ -275,7 +275,7 @@
         <button class="action" id="btnEq1">Resolver</button>
         <button class="ghost-action clear-btn" type="button" data-panel="equacao-primeiro" data-output="saidaEq1">Limpar</button>
       </div>
-      <p class="result" id="saidaEq1"></p>
+      <div class="result" id="saidaEq1"></div>
     </section>
 
     <section id="equacao-segundo" class="panel" aria-live="polite" role="tabpanel" aria-labelledby="tab-equacao-segundo">
@@ -302,7 +302,7 @@
         <button class="action" id="btnEq2">Resolver</button>
         <button class="ghost-action clear-btn" type="button" data-panel="equacao-segundo" data-output="saidaEq2">Limpar</button>
       </div>
-      <p class="result" id="saidaEq2"></p>
+      <div class="result" id="saidaEq2"></div>
     </section>
 
     <section id="funcao-primeiro" class="panel" aria-live="polite" role="tabpanel" aria-labelledby="tab-funcao-primeiro">
@@ -329,7 +329,7 @@
         <button class="action" id="btnFunc1">Calcular</button>
         <button class="ghost-action clear-btn" type="button" data-panel="funcao-primeiro" data-output="saidaFunc1">Limpar</button>
       </div>
-      <p class="result" id="saidaFunc1"></p>
+      <div class="result" id="saidaFunc1"></div>
     </section>
 
     <section id="funcao-segundo" class="panel" aria-live="polite" role="tabpanel" aria-labelledby="tab-funcao-segundo">
@@ -359,7 +359,7 @@
         <button class="action" id="btnFunc2">Calcular</button>
         <button class="ghost-action clear-btn" type="button" data-panel="funcao-segundo" data-output="saidaFunc2">Limpar</button>
       </div>
-      <p class="result" id="saidaFunc2"></p>
+      <div class="result" id="saidaFunc2"></div>
     </section>
 
     <section id="inequacao-primeiro" class="panel" aria-live="polite" role="tabpanel" aria-labelledby="tab-inequacao-primeiro">
@@ -383,7 +383,7 @@
         <button class="action" id="btnIneq1">Resolver</button>
         <button class="ghost-action clear-btn" type="button" data-panel="inequacao-primeiro" data-output="saidaIneq1">Limpar</button>
       </div>
-      <p class="result" id="saidaIneq1"></p>
+      <div class="result" id="saidaIneq1"></div>
     </section>
 
     <section id="inequacao-segundo" class="panel" aria-live="polite" role="tabpanel" aria-labelledby="tab-inequacao-segundo">
@@ -410,7 +410,7 @@
         <button class="action" id="btnIneq2">Resolver</button>
         <button class="ghost-action clear-btn" type="button" data-panel="inequacao-segundo" data-output="saidaIneq2">Limpar</button>
       </div>
-      <p class="result" id="saidaIneq2"></p>
+      <div class="result" id="saidaIneq2"></div>
     </section>
 
     <section id="conjuntos" class="panel" aria-live="polite" role="tabpanel" aria-labelledby="tab-conjuntos">
@@ -443,7 +443,7 @@
         <button class="action" id="btnConjuntos">Calcular</button>
         <button class="ghost-action clear-btn" type="button" data-panel="conjuntos" data-output="saidaConjuntos">Limpar</button>
       </div>
-      <p class="result" id="saidaConjuntos"></p>
+      <div class="result" id="saidaConjuntos"></div>
     </section>
 
     <section id="dominio-imagem" class="panel" aria-live="polite" role="tabpanel" aria-labelledby="tab-dominio-imagem">
@@ -497,7 +497,7 @@
         <button class="action" id="btnDominioImagem">Gerar</button>
         <button class="ghost-action clear-btn" type="button" data-panel="dominio-imagem" data-output="saidaDominioImagem">Limpar</button>
       </div>
-      <p class="result" id="saidaDominioImagem"></p>
+      <div class="result" id="saidaDominioImagem"></div>
     </section>
 
     <section id="historico" class="panel" aria-live="polite" role="tabpanel" aria-labelledby="tab-historico">
@@ -512,6 +512,6 @@
     </section>
   </main>
 
-  <script src="script.js?v=20260408-darkfix"></script>
+  <script src="script.js?v=20260414-graphfix3"></script>
 </body>
 </html>

@@ -5,6 +5,9 @@ const activeModuleText = byId("moduloAtivo");
 // Dark Mode Toggle
 (function() {
   const themeToggle = document.getElementById("themeToggle");
+  if (!themeToggle) {
+    return;
+  }
   const THEME_KEY = "winston_theme";
   
   // Verifica se existe preferência salva
@@ -104,11 +107,13 @@ function byId(id) {
 }
 
 function toNumber(id) {
-  return Number.parseFloat(byId(id).value);
+  const field = byId(id);
+  return field ? Number.parseFloat(field.value) : Number.NaN;
 }
 
 function toText(id) {
-  return byId(id).value;
+  const field = byId(id);
+  return field ? field.value : "";
 }
 
 function print(targetId, message) {
@@ -236,6 +241,257 @@ function formatNumber(value, maxDecimals = 6) {
     minimumFractionDigits: 0,
     maximumFractionDigits: maxDecimals
   });
+}
+
+function renderRichOutput(targetId, summaryHtml, graphHtml) {
+  const output = byId(targetId);
+  output.classList.remove("error");
+  output.innerHTML = `<div class="result-content">${summaryHtml}${graphHtml || ""}</div>`;
+}
+
+function toFixedNumber(value, decimals = 2) {
+  return Number.parseFloat(value.toFixed(decimals));
+}
+
+function svgHeader(width, height) {
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="100%" height="${height}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Gráfico matemático" style="display:block; max-width:100%;">`;
+}
+
+function createAxisLabels(width, height, xLabel, yLabel) {
+  return `
+    <text x="${width - 18}" y="${height - 12}" text-anchor="end" font-size="12" fill="#54627a">${xLabel}</text>
+    <text x="18" y="18" text-anchor="start" font-size="12" fill="#54627a">${yLabel}</text>`;
+}
+
+function createLinePath(points, toX, toY) {
+  return points.map((point, index) => `${index === 0 ? "M" : "L"}${toX(point.x)} ${toY(point.y)}`).join(" ");
+}
+
+function createCircle(cx, cy, color = "#ff7a30", radius = 4) {
+  return `<circle cx="${cx}" cy="${cy}" r="${radius}" fill="${color}" stroke="#fff" stroke-width="2"></circle>`;
+}
+
+function criarGraficoJuros(capital, taxaPercentual, tempo, isComposto) {
+  const taxa = taxaPercentual / 100;
+  const samples = Math.max(20, Math.ceil(tempo * 12));
+  const xMax = Math.max(tempo, 1);
+  const points = [];
+
+  for (let index = 0; index <= samples; index += 1) {
+    const x = (xMax * index) / samples;
+    const y = isComposto ? capital * (1 + taxa) ** x : capital * (1 + taxa * x);
+    points.push({ x, y });
+  }
+
+  const maxY = Math.max(...points.map((point) => point.y), capital) * 1.12;
+  const minY = 0;
+  const width = 760;
+  const height = 320;
+  const paddingLeft = 86;
+  const paddingRight = 56;
+  const paddingTop = 36;
+  const paddingBottom = 46;
+  const graphWidth = width - paddingLeft - paddingRight;
+  const graphHeight = height - paddingTop - paddingBottom;
+
+  const toX = (value) => paddingLeft + (value / xMax) * graphWidth;
+  const toY = (value) => paddingTop + graphHeight - ((value - minY) / (maxY - minY)) * graphHeight;
+
+  const originY = toY(0);
+  const path = createLinePath(points, toX, toY);
+  const finalPoint = points[points.length - 1];
+  const finalText = isComposto ? "Crescimento composto" : "Crescimento simples";
+
+  let svg = svgHeader(width, height);
+  for (let step = 0; step <= 5; step += 1) {
+    const x = paddingLeft + (graphWidth * step) / 5;
+    const value = (xMax * step) / 5;
+    svg += `<line x1="${x}" y1="${paddingTop}" x2="${x}" y2="${height - paddingBottom}" stroke="rgba(84,98,122,0.15)" stroke-width="1" />`;
+    svg += `<text x="${x}" y="${height - 22}" text-anchor="middle" font-size="11" fill="#54627a">${formatNumber(value, 1)}</text>`;
+  }
+
+  for (let step = 0; step <= 4; step += 1) {
+    const y = paddingTop + (graphHeight * step) / 4;
+    const value = maxY - ((maxY - minY) * step) / 4;
+    svg += `<line x1="${paddingLeft}" y1="${y}" x2="${width - paddingRight}" y2="${y}" stroke="rgba(84,98,122,0.15)" stroke-width="1" />`;
+    svg += `<text x="${paddingLeft - 10}" y="${y + 4}" text-anchor="end" font-size="11" fill="#54627a">${money(value)}</text>`;
+  }
+
+  svg += `<line x1="${paddingLeft}" y1="${toY(0)}" x2="${width - paddingRight}" y2="${toY(0)}" stroke="rgba(20,33,61,0.5)" stroke-width="2" />`;
+  svg += `<line x1="${paddingLeft}" y1="${paddingTop}" x2="${paddingLeft}" y2="${height - paddingBottom}" stroke="rgba(20,33,61,0.5)" stroke-width="2" />`;
+  svg += `<path d="${path}" fill="none" stroke="#ff7a30" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />`;
+  svg += createCircle(toX(0), toY(capital), "#009fb7", 5);
+  svg += createCircle(toX(finalPoint.x), toY(finalPoint.y), "#ff7a30", 5);
+  svg += `<text x="${width - paddingRight - 6}" y="${toY(finalPoint.y) - 12}" text-anchor="end" font-size="12" fill="#1f2d4d">${money(finalPoint.y)}</text>`;
+  svg += createAxisLabels(width, height, "Tempo", "Montante");
+  svg += `</svg>`;
+
+  return `<div class="graph-block"><div class="graph-title">${finalText}</div>${svg}</div>`;
+}
+
+function criarGraficoParabola(a, b, c, options = {}) {
+  const epsilon = 1e-10;
+  const delta = b * b - 4 * a * c;
+  const deltaCorrigido = Math.abs(delta) < epsilon ? 0 : delta;
+  const xVertices = -b / (2 * a);
+  const yVertices = a * xVertices * xVertices + b * xVertices + c;
+  const raiz1 = deltaCorrigido >= 0 ? (-b - Math.sqrt(deltaCorrigido)) / (2 * a) : null;
+  const raiz2 = deltaCorrigido >= 0 ? (-b + Math.sqrt(deltaCorrigido)) / (2 * a) : null;
+  const highlightX = typeof options.highlightX === "number" ? options.highlightX : null;
+  const spanBase = Math.max(4, Math.abs(xVertices) + 3, raiz1 !== null && raiz2 !== null ? Math.abs(raiz2 - raiz1) * 1.6 + 2 : 0);
+  const span = highlightX === null ? spanBase : Math.max(spanBase, Math.abs(highlightX - xVertices) + 2);
+  const xMin = xVertices - span;
+  const xMax = xVertices + span;
+  const width = 760;
+  const height = 360;
+  const paddingLeft = 86;
+  const paddingRight = 56;
+  const paddingTop = 42;
+  const paddingBottom = 52;
+  const graphWidth = width - paddingLeft - paddingRight;
+  const graphHeight = height - paddingTop - paddingBottom;
+  const sampleCount = 180;
+  const points = [];
+
+  for (let index = 0; index <= sampleCount; index += 1) {
+    const x = xMin + ((xMax - xMin) * index) / sampleCount;
+    const y = a * x * x + b * x + c;
+    points.push({ x, y });
+  }
+
+  const minY = Math.min(0, ...points.map((point) => point.y));
+  const maxY = Math.max(0, ...points.map((point) => point.y));
+  const yMargin = Math.max(1, (maxY - minY) * 0.12);
+  const yMin = minY - yMargin;
+  const yMax = maxY + yMargin;
+
+  const toX = (value) => paddingLeft + ((value - xMin) / (xMax - xMin)) * graphWidth;
+  const toY = (value) => paddingTop + graphHeight - ((value - yMin) / (yMax - yMin)) * graphHeight;
+  const zeroY = toY(0);
+  const path = createLinePath(points, toX, toY);
+
+  let svg = svgHeader(width, height);
+  for (let step = 0; step <= 6; step += 1) {
+    const x = paddingLeft + (graphWidth * step) / 6;
+    const value = xMin + ((xMax - xMin) * step) / 6;
+    svg += `<line x1="${x}" y1="${paddingTop}" x2="${x}" y2="${height - paddingBottom}" stroke="rgba(84,98,122,0.15)" stroke-width="1" />`;
+    svg += `<text x="${x}" y="${height - 20}" text-anchor="middle" font-size="11" fill="#54627a">${formatNumber(value, 2)}</text>`;
+  }
+
+  for (let step = 0; step <= 4; step += 1) {
+    const y = paddingTop + (graphHeight * step) / 4;
+    const value = yMax - ((yMax - yMin) * step) / 4;
+    svg += `<line x1="${paddingLeft}" y1="${y}" x2="${width - paddingRight}" y2="${y}" stroke="rgba(84,98,122,0.15)" stroke-width="1" />`;
+    svg += `<text x="${paddingLeft - 10}" y="${y + 4}" text-anchor="end" font-size="11" fill="#54627a">${formatNumber(value, 2)}</text>`;
+  }
+
+  if (zeroY >= paddingTop && zeroY <= height - paddingBottom) {
+    svg += `<line x1="${paddingLeft}" y1="${zeroY}" x2="${width - paddingRight}" y2="${zeroY}" stroke="rgba(20,33,61,0.5)" stroke-width="2" />`;
+  }
+
+  svg += `<line x1="${paddingLeft}" y1="${paddingTop}" x2="${paddingLeft}" y2="${height - paddingBottom}" stroke="rgba(20,33,61,0.5)" stroke-width="2" />`;
+  svg += `<path d="${path}" fill="none" stroke="#1f2d4d" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />`;
+
+  if (options.fillPositive) {
+    const positiveSegments = [];
+    let segment = [];
+
+    points.forEach((point) => {
+      if (point.y > 0) {
+        segment.push(point);
+      } else if (segment.length > 0) {
+        positiveSegments.push(segment);
+        segment = [];
+      }
+    });
+
+    if (segment.length > 0) {
+      positiveSegments.push(segment);
+    }
+
+    positiveSegments.forEach((segmentPoints) => {
+      const areaPath = [`M ${toX(segmentPoints[0].x)} ${zeroY}`];
+      segmentPoints.forEach((point) => {
+        areaPath.push(`L ${toX(point.x)} ${toY(point.y)}`);
+      });
+      areaPath.push(`L ${toX(segmentPoints[segmentPoints.length - 1].x)} ${zeroY} Z`);
+      svg += `<path d="${areaPath.join(" ")}" fill="rgba(255,122,48,0.18)" stroke="none" />`;
+    });
+  }
+
+  if (deltaCorrigido >= 0 && raiz1 !== null && raiz2 !== null) {
+    svg += createCircle(toX(raiz1), zeroY, "#b4472d", 5);
+    svg += createCircle(toX(raiz2), zeroY, "#b4472d", 5);
+    svg += `<text x="${toX(raiz1)}" y="${zeroY - 10}" text-anchor="middle" font-size="11" fill="#b4472d">${formatNumber(raiz1, 2)}</text>`;
+    svg += `<text x="${toX(raiz2)}" y="${zeroY - 10}" text-anchor="middle" font-size="11" fill="#b4472d">${formatNumber(raiz2, 2)}</text>`;
+  }
+
+  svg += createCircle(toX(xVertices), toY(yVertices), "#009fb7", 5);
+  svg += `<text x="${toX(xVertices)}" y="${toY(yVertices) - 10}" text-anchor="middle" font-size="11" fill="#009fb7">V(${formatNumber(xVertices, 2)}, ${formatNumber(yVertices, 2)})</text>`;
+
+  if (highlightX !== null) {
+    const highlightY = a * highlightX * highlightX + b * highlightX + c;
+    svg += `<line x1="${toX(highlightX)}" y1="${zeroY}" x2="${toX(highlightX)}" y2="${toY(highlightY)}" stroke="#ff7a30" stroke-dasharray="6 6" stroke-width="2" />`;
+    svg += createCircle(toX(highlightX), toY(highlightY), "#ff7a30", 6);
+    svg += `<text x="${toX(highlightX)}" y="${toY(highlightY) - 12}" text-anchor="middle" font-size="11" fill="#ff7a30">f(${formatNumber(highlightX, 2)}) = ${formatNumber(highlightY, 2)}</text>`;
+  }
+
+  svg += createAxisLabels(width, height, "x", "f(x)");
+  svg += `</svg>`;
+
+  const rootsText = deltaCorrigido >= 0
+    ? `Raízes: ${formatNumber(raiz1, 3)} e ${formatNumber(raiz2, 3)}`
+    : "Sem raízes reais";
+
+  return `<div class="graph-block"><div class="graph-title">${rootsText}</div>${svg}</div>`;
+}
+
+function criarGraficoJurosComparativo(tipo, capital, taxaPercentual, tempo) {
+  return criarGraficoJuros(capital, taxaPercentual, tempo, tipo === "composto");
+}
+
+function criarDiagramaVenn(setA, setB, operacao) {
+  const a = [...setA];
+  const b = [...setB];
+  const intersecao = a.filter((item) => b.includes(item));
+  const soA = a.filter((item) => !b.includes(item));
+  const soB = b.filter((item) => !a.includes(item));
+  const width = 720;
+  const height = 320;
+  const cx1 = 250;
+  const cx2 = 470;
+  const cy = 150;
+  const r = 110;
+
+  const colors = {
+    uniao: { a: "rgba(255, 122, 48, 0.25)", b: "rgba(0, 159, 183, 0.25)", line: "#ff7a30" },
+    intersecao: { a: "rgba(255, 122, 48, 0.12)", b: "rgba(0, 159, 183, 0.12)", line: "#14213d" },
+    diferencaAB: { a: "rgba(255, 122, 48, 0.35)", b: "rgba(0, 159, 183, 0.08)", line: "#ff7a30" },
+    diferencaBA: { a: "rgba(255, 122, 48, 0.08)", b: "rgba(0, 159, 183, 0.35)", line: "#009fb7" },
+    simetrica: { a: "rgba(255, 122, 48, 0.28)", b: "rgba(0, 159, 183, 0.28)", line: "#6d5bd0" }
+  };
+
+  const palette = colors[operacao] || colors.uniao;
+  const summary = {
+    uniao: `União: ${formatSet([...new Set([...a, ...b])])}`,
+    intersecao: `Interseção: ${formatSet(intersecao)}`,
+    diferencaAB: `Diferença A - B: ${formatSet(soA)}`,
+    diferencaBA: `Diferença B - A: ${formatSet(soB)}`,
+    simetrica: `Diferença simétrica: ${formatSet([...soA, ...soB])}`
+  };
+
+  let svg = svgHeader(width, height);
+  svg += `<circle cx="${cx1}" cy="${cy}" r="${r}" fill="${palette.a}" stroke="${palette.line}" stroke-width="3" />`;
+  svg += `<circle cx="${cx2}" cy="${cy}" r="${r}" fill="${palette.b}" stroke="${palette.line}" stroke-width="3" />`;
+  svg += `<text x="${cx1}" y="${cy - 130}" text-anchor="middle" fill="#1f2d4d" font-size="15" font-weight="700">A</text>`;
+  svg += `<text x="${cx2}" y="${cy - 130}" text-anchor="middle" fill="#1f2d4d" font-size="15" font-weight="700">B</text>`;
+  svg += `<text x="${(cx1 + cx2) / 2}" y="${cy + 6}" text-anchor="middle" fill="#1f2d4d" font-size="15" font-weight="700">A ∩ B</text>`;
+  svg += `<text x="${cx1 - 60}" y="${cy + 6}" text-anchor="middle" fill="#1f2d4d" font-size="12">${soA.length ? soA.join(", ") : "∅"}</text>`;
+  svg += `<text x="${cx2 + 60}" y="${cy + 6}" text-anchor="middle" fill="#1f2d4d" font-size="12">${soB.length ? soB.join(", ") : "∅"}</text>`;
+  svg += `<text x="360" y="290" text-anchor="middle" fill="#1f2d4d" font-size="12">${intersecao.length ? intersecao.join(", ") : "∅"}</text>`;
+  svg += `</svg>`;
+
+  return `<div class="graph-block"><div class="graph-title">${summary[operacao] || summary.uniao}</div>${svg}</div>`;
 }
 
 function nomeUnidade(valor, singular, plural) {
@@ -530,10 +786,8 @@ function calcularJurosCompostos() {
     return;
   }
 
-  print(
-    "saidaComposto",
-    `Períodos equivalentes: ${formatNumber(periodos, 4)} | Juros: ${money(juros)} | Montante: ${money(montante)}`
-  );
+  const resumo = `Períodos equivalentes: ${formatNumber(periodos, 4)} | Juros: ${money(juros)} | Montante: ${money(montante)}`;
+  renderRichOutput("saidaComposto", `<p class="result-main">${resumo}</p>`, criarGraficoJuros(capital, taxa * 100, tempo, true));
 
   addHistoryEntry(
     "Juros Compostos",
@@ -567,10 +821,8 @@ function calcularJurosSimples() {
     return;
   }
 
-  print(
-    "saidaSimples",
-    `Períodos equivalentes: ${formatNumber(periodos, 4)} | Juros: ${money(juros)} | Montante: ${money(montante)}`
-  );
+  const resumo = `Períodos equivalentes: ${formatNumber(periodos, 4)} | Juros: ${money(juros)} | Montante: ${money(montante)}`;
+  renderRichOutput("saidaSimples", `<p class="result-main">${resumo}</p>`, criarGraficoJuros(capital, taxa * 100, tempo, false));
 
   addHistoryEntry(
     "Juros Simples",
@@ -615,10 +867,8 @@ function resolverEquacaoSegundo() {
   const x1 = (-b + Math.sqrt(deltaCorrigido)) / (2 * a);
   const x2 = (-b - Math.sqrt(deltaCorrigido)) / (2 * a);
 
-  print(
-    "saidaEq2",
-    `Delta = ${formatNumber(deltaCorrigido)} | x1 = ${formatNumber(x1, 4)} | x2 = ${formatNumber(x2, 4)}`
-  );
+  const resumo = `Delta = ${formatNumber(deltaCorrigido)} | x1 = ${formatNumber(x1, 4)} | x2 = ${formatNumber(x2, 4)}`;
+  renderRichOutput("saidaEq2", `<p class="result-main">${resumo}</p>`, criarGraficoParabola(a, b, c));
 
   addHistoryEntry(
     "Equação 2º",
@@ -653,7 +903,8 @@ function calcularFuncaoSegundo() {
   }
 
   const fx = a * x * x + b * x + c;
-  print("saidaFunc2", `f(${formatNumber(x, 4)}) = ${formatNumber(fx, 4)} | Função: f(x) = ${formatNumber(a, 4)}x² + ${formatNumber(b, 4)}x + ${formatNumber(c, 4)}`);
+  const resumo = `f(${formatNumber(x, 4)}) = ${formatNumber(fx, 4)} | Função: f(x) = ${formatNumber(a, 4)}x² + ${formatNumber(b, 4)}x + ${formatNumber(c, 4)}`;
+  renderRichOutput("saidaFunc2", `<p class="result-main">${resumo}</p>`, criarGraficoParabola(a, b, c, { highlightX: x }));
   addHistoryEntry("Função 2º", `f(x) = ${formatNumber(a, 4)}x² + ${formatNumber(b, 4)}x + ${formatNumber(c, 4)}, x=${formatNumber(x, 4)} -> f(x)=${formatNumber(fx, 4)}`);
 }
 
@@ -692,10 +943,7 @@ function resolverInequacaoSegundo() {
     const mensagem =
       a > 0 ? "Solução: todos os valores reais." : "Solução: conjunto vazio.";
 
-    print(
-      "saidaIneq2",
-      mensagem
-    );
+    renderRichOutput("saidaIneq2", `<p class="result-main">${mensagem}</p>`, criarGraficoParabola(a, b, c, { fillPositive: true }));
 
     addHistoryEntry("Inequação 2º", `a=${formatNumber(a)}, b=${formatNumber(b)}, c=${formatNumber(c)} -> ${mensagem}`);
     return;
@@ -707,11 +955,11 @@ function resolverInequacaoSegundo() {
   if (deltaCorrigido === 0) {
     if (a > 0) {
       const mensagem = `Solução: x ≠ ${formatNumber(raiz1, 4)}.`;
-      print("saidaIneq2", mensagem);
+      renderRichOutput("saidaIneq2", `<p class="result-main">${mensagem}</p>`, criarGraficoParabola(a, b, c, { fillPositive: true }));
       addHistoryEntry("Inequação 2º", `a=${formatNumber(a)}, b=${formatNumber(b)}, c=${formatNumber(c)} -> ${mensagem}`);
     } else {
       const mensagem = "Solução: conjunto vazio.";
-      print("saidaIneq2", mensagem);
+      renderRichOutput("saidaIneq2", `<p class="result-main">${mensagem}</p>`, criarGraficoParabola(a, b, c, { fillPositive: true }));
       addHistoryEntry("Inequação 2º", `a=${formatNumber(a)}, b=${formatNumber(b)}, c=${formatNumber(c)} -> ${mensagem}`);
     }
     return;
@@ -721,20 +969,14 @@ function resolverInequacaoSegundo() {
     const mensagem =
       `Solução: x < ${formatNumber(raiz1, 4)} ou x > ${formatNumber(raiz2, 4)}.`;
 
-    print(
-      "saidaIneq2",
-      mensagem
-    );
+    renderRichOutput("saidaIneq2", `<p class="result-main">${mensagem}</p>`, criarGraficoParabola(a, b, c, { fillPositive: true }));
 
     addHistoryEntry("Inequação 2º", `a=${formatNumber(a)}, b=${formatNumber(b)}, c=${formatNumber(c)} -> ${mensagem}`);
   } else {
     const mensagem =
       `Solução: ${formatNumber(raiz1, 4)} < x < ${formatNumber(raiz2, 4)}.`;
 
-    print(
-      "saidaIneq2",
-      mensagem
-    );
+    renderRichOutput("saidaIneq2", `<p class="result-main">${mensagem}</p>`, criarGraficoParabola(a, b, c, { fillPositive: true }));
 
     addHistoryEntry("Inequação 2º", `a=${formatNumber(a)}, b=${formatNumber(b)}, c=${formatNumber(c)} -> ${mensagem}`);
   }
@@ -794,7 +1036,7 @@ function calcularConjuntos() {
   }
 
   const saida = `${nomeOperacao} = ${formatSet(resultado)}`;
-  print("saidaConjuntos", saida);
+  renderRichOutput("saidaConjuntos", `<p class="result-main">${saida}</p>`, criarDiagramaVenn(a, b, operacao));
   addHistoryEntry("Conjuntos", `A=${formatSet(a)}, B=${formatSet(b)} -> ${saida}`);
 }
 
@@ -828,51 +1070,42 @@ function criarGraficoCartesiano(xMin, xMax, yMin, yMax) {
   const toSvgX = (x) => padding + ((x - xMin) / xRange) * graphWidth;
   const toSvgY = (y) => padding + graphHeight - ((y - yMin) / yRange) * graphHeight;
 
-  let svgContent = `<svg width="${svgWidth}" height="${svgHeight}" style="border: 1px solid #ddd; margin: 10px 0; background: #fafafa;">`;
-
-  svgContent += `<defs><style>
-    .grid-line { stroke: #e0e0e0; stroke-width: 1; }
-    .axis { stroke: #333; stroke-width: 2; }
-    .tick { stroke: #666; stroke-width: 1; }
-    .axis-label { font-size: 12px; fill: #333; }
-    .point { fill: #ff7a30; r: 4; }
-    .point-hover { r: 6; }
-  </style></defs>`;
+  let svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="${svgWidth}" height="${svgHeight}" viewBox="0 0 ${svgWidth} ${svgHeight}" preserveAspectRatio="xMidYMid meet" style="display:block; max-width:100%; margin:10px 0;">`;
 
   for (let x = xMin; x <= xMax; x += xStep) {
     const sx = toSvgX(x);
-    svgContent += `<line class="grid-line" x1="${sx}" y1="${padding}" x2="${sx}" y2="${svgHeight - padding}" />`;
+    svgContent += `<line x1="${sx}" y1="${padding}" x2="${sx}" y2="${svgHeight - padding}" stroke="#e0e0e0" stroke-width="1" />`;
   }
 
   for (let y = yMin; y <= yMax; y += yStep) {
     const sy = toSvgY(y);
-    svgContent += `<line class="grid-line" x1="${padding}" y1="${sy}" x2="${svgWidth - padding}" y2="${sy}" />`;
+    svgContent += `<line x1="${padding}" y1="${sy}" x2="${svgWidth - padding}" y2="${sy}" stroke="#e0e0e0" stroke-width="1" />`;
   }
 
   const originX = toSvgX(0);
   const originY = toSvgY(0);
 
   if (originX >= padding && originX <= svgWidth - padding) {
-    svgContent += `<line class="axis" x1="${originX}" y1="${padding}" x2="${originX}" y2="${svgHeight - padding}" />`;
+    svgContent += `<line x1="${originX}" y1="${padding}" x2="${originX}" y2="${svgHeight - padding}" stroke="#333" stroke-width="2" />`;
   }
 
   if (originY >= padding && originY <= svgHeight - padding) {
-    svgContent += `<line class="axis" x1="${padding}" y1="${originY}" x2="${svgWidth - padding}" y2="${originY}" />`;
+    svgContent += `<line x1="${padding}" y1="${originY}" x2="${svgWidth - padding}" y2="${originY}" stroke="#333" stroke-width="2" />`;
   }
 
-  svgContent += `<line class="axis" x1="${padding}" y1="${padding}" x2="${padding}" y2="${svgHeight - padding}" />`;
-  svgContent += `<line class="axis" x1="${padding}" y1="${svgHeight - padding}" x2="${svgWidth - padding}" y2="${svgHeight - padding}" />`;
+  svgContent += `<line x1="${padding}" y1="${padding}" x2="${padding}" y2="${svgHeight - padding}" stroke="#333" stroke-width="2" />`;
+  svgContent += `<line x1="${padding}" y1="${svgHeight - padding}" x2="${svgWidth - padding}" y2="${svgHeight - padding}" stroke="#333" stroke-width="2" />`;
 
   for (let x = xMin; x <= xMax; x += xStep) {
     const sx = toSvgX(x);
-    svgContent += `<line class="tick" x1="${sx}" y1="${svgHeight - padding - 3}" x2="${sx}" y2="${svgHeight - padding + 3}" />`;
-    svgContent += `<text class="axis-label" x="${sx}" y="${svgHeight - padding + 15}" text-anchor="middle">${formatNumber(x, 2)}</text>`;
+    svgContent += `<line x1="${sx}" y1="${svgHeight - padding - 3}" x2="${sx}" y2="${svgHeight - padding + 3}" stroke="#666" stroke-width="1" />`;
+    svgContent += `<text x="${sx}" y="${svgHeight - padding + 15}" text-anchor="middle" font-size="12" fill="#333">${formatNumber(x, 2)}</text>`;
   }
 
   for (let y = yMin; y <= yMax; y += yStep) {
     const sy = toSvgY(y);
-    svgContent += `<line class="tick" x1="${padding - 3}" y1="${sy}" x2="${padding + 3}" y2="${sy}" />`;
-    svgContent += `<text class="axis-label" x="${padding - 10}" y="${sy + 4}" text-anchor="end">${formatNumber(y, 2)}</text>`;
+    svgContent += `<line x1="${padding - 3}" y1="${sy}" x2="${padding + 3}" y2="${sy}" stroke="#666" stroke-width="1" />`;
+    svgContent += `<text x="${padding - 10}" y="${sy + 4}" text-anchor="end" font-size="12" fill="#333">${formatNumber(y, 2)}</text>`;
   }
 
   const points = [];
@@ -888,11 +1121,11 @@ function criarGraficoCartesiano(xMin, xMax, yMin, yMax) {
   points.forEach((point) => {
     const sx = toSvgX(point.x);
     const sy = toSvgY(point.y);
-    svgContent += `<circle class="point" cx="${sx}" cy="${sy}" data-x="${formatNumber(point.x, 2)}" data-y="${formatNumber(point.y, 2)}" title="x: ${formatNumber(point.x, 2)}, y: ${formatNumber(point.y, 2)}" />`;
+    svgContent += `<circle cx="${sx}" cy="${sy}" r="4" fill="#ff7a30" stroke="#fff" stroke-width="2" data-x="${formatNumber(point.x, 2)}" data-y="${formatNumber(point.y, 2)}" title="x: ${formatNumber(point.x, 2)}, y: ${formatNumber(point.y, 2)}" />`;
   });
 
-  svgContent += `<text class="axis-label" x="${svgWidth / 2}" y="${svgHeight - 5}" text-anchor="middle" style="font-size: 14px;">x</text>`;
-  svgContent += `<text class="axis-label" x="15" y="${svgHeight / 2}" text-anchor="middle" style="font-size: 14px; transform: rotate(-90deg); transform-origin: 15px ${svgHeight / 2};">y</text>`;
+  svgContent += `<text x="${svgWidth / 2}" y="${svgHeight - 5}" text-anchor="middle" font-size="14" fill="#333">x</text>`;
+  svgContent += `<text x="15" y="${svgHeight / 2}" text-anchor="middle" font-size="14" fill="#333" transform="rotate(-90 15 ${svgHeight / 2})">y</text>`;
 
   svgContent += `</svg>`;
 
@@ -952,17 +1185,24 @@ function gerarDominioImagem() {
   addHistoryEntry("Domínio e Imagem", saida);
 }
 
-byId("btnComposto").addEventListener("click", calcularJurosCompostos);
-byId("btnSimples").addEventListener("click", calcularJurosSimples);
-byId("btnEq1").addEventListener("click", resolverEquacaoPrimeiro);
-byId("btnEq2").addEventListener("click", resolverEquacaoSegundo);
-byId("btnFunc1").addEventListener("click", calcularFuncaoPrimeiro);
-byId("btnFunc2").addEventListener("click", calcularFuncaoSegundo);
-byId("btnIneq1").addEventListener("click", resolverInequacaoPrimeiro);
-byId("btnIneq2").addEventListener("click", resolverInequacaoSegundo);
-byId("btnConjuntos").addEventListener("click", calcularConjuntos);
-byId("btnDominioImagem").addEventListener("click", gerarDominioImagem);
-byId("btnLimparHistorico").addEventListener("click", limparHistorico);
+function bindClick(id, handler) {
+  const element = byId(id);
+  if (element) {
+    element.addEventListener("click", handler);
+  }
+}
+
+bindClick("btnComposto", calcularJurosCompostos);
+bindClick("btnSimples", calcularJurosSimples);
+bindClick("btnEq1", resolverEquacaoPrimeiro);
+bindClick("btnEq2", resolverEquacaoSegundo);
+bindClick("btnFunc1", calcularFuncaoPrimeiro);
+bindClick("btnFunc2", calcularFuncaoSegundo);
+bindClick("btnIneq1", resolverInequacaoPrimeiro);
+bindClick("btnIneq2", resolverInequacaoSegundo);
+bindClick("btnConjuntos", calcularConjuntos);
+bindClick("btnDominioImagem", gerarDominioImagem);
+bindClick("btnLimparHistorico", limparHistorico);
 
 document.querySelectorAll(".clear-btn").forEach((button) => {
   button.addEventListener("click", () => {
@@ -1015,40 +1255,51 @@ document.querySelectorAll(".clear-btn").forEach((button) => {
   });
 });
 
-document.addEventListener("click", (event) => {
-  const button = event.target.closest(".example-btn");
-
-  if (!button) {
-    return;
-  }
-
-  aplicarExemplo(button.dataset.kind, button.dataset.example);
+document.querySelectorAll(".example-btn").forEach((button) => {
+  button.addEventListener("click", () => {
+    aplicarExemplo(button.dataset.kind, button.dataset.example);
+  });
 });
 
 
 
 ["capitalComposto", "taxaComposta", "tempoComposto", "taxaCompostaUnidade", "tempoCompostoUnidade"].forEach((id) => {
-  byId(id).addEventListener("input", () => {
+  const field = byId(id);
+  if (!field) {
+    return;
+  }
+
+  field.addEventListener("input", () => {
     atualizarExplicacaoJuros("composto");
   });
 
-  byId(id).addEventListener("change", () => {
+  field.addEventListener("change", () => {
     atualizarExplicacaoJuros("composto");
   });
 });
 
 ["capitalSimples", "taxaSimples", "tempoSimples", "taxaSimplesUnidade", "tempoSimplesUnidade"].forEach((id) => {
-  byId(id).addEventListener("input", () => {
+  const field = byId(id);
+  if (!field) {
+    return;
+  }
+
+  field.addEventListener("input", () => {
     atualizarExplicacaoJuros("simples");
   });
 
-  byId(id).addEventListener("change", () => {
+  field.addEventListener("change", () => {
     atualizarExplicacaoJuros("simples");
   });
 });
 
 ["func1a", "func1b", "func1x"].forEach((id) => {
-  byId(id).addEventListener("input", () => {
+  const field = byId(id);
+  if (!field) {
+    return;
+  }
+
+  field.addEventListener("input", () => {
     if (byId("explicaFunc1")) {
       byId("explicaFunc1").textContent = "Preencha os campos para visualizar o valor da função antes de calcular.";
     }
@@ -1056,7 +1307,12 @@ document.addEventListener("click", (event) => {
 });
 
 ["func2a", "func2b", "func2c", "func2x"].forEach((id) => {
-  byId(id).addEventListener("input", () => {
+  const field = byId(id);
+  if (!field) {
+    return;
+  }
+
+  field.addEventListener("input", () => {
     if (byId("explicaFunc2")) {
       byId("explicaFunc2").textContent = "Preencha os campos para visualizar o valor da função antes de calcular.";
     }
@@ -1079,6 +1335,10 @@ document.querySelectorAll(".panel input, .panel select").forEach((field) => {
 });
 
 showPanel("juros-compostos");
-atualizarExplicacaoJuros("composto");
-atualizarExplicacaoJuros("simples");
+if (byId("capitalComposto") && byId("taxaComposta") && byId("tempoComposto") && byId("taxaCompostaUnidade") && byId("tempoCompostoUnidade")) {
+  atualizarExplicacaoJuros("composto");
+}
+if (byId("capitalSimples") && byId("taxaSimples") && byId("tempoSimples") && byId("taxaSimplesUnidade") && byId("tempoSimplesUnidade")) {
+  atualizarExplicacaoJuros("simples");
+}
 loadHistorico();

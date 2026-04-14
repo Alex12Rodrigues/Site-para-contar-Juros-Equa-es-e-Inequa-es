@@ -553,6 +553,39 @@ select:focus {
   word-break: break-word;
 }
 
+.result-content {
+  display: grid;
+  gap: 12px;
+}
+
+.result-main {
+  margin: 0;
+  font-family: inherit;
+  font-size: 0.98rem;
+  line-height: 1.5;
+}
+
+.graph-block {
+  display: grid;
+  gap: 10px;
+}
+
+.graph-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+body.dark-mode .graph-title {
+  color: #e8eef5;
+}
+
+.result svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
 .result.error {
   color: var(--warn);
   border-color: #e8b9a8;
