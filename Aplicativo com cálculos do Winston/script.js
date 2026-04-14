@@ -27,6 +27,20 @@ const activeModuleText = byId("moduloAtivo");
     const isDark = document.body.classList.contains("dark-mode");
     localStorage.setItem(THEME_KEY, isDark ? "dark" : "light");
     themeToggle.querySelector(".theme-icon").textContent = isDark ? "☀️" : "🌙";
+
+    // Recalcula o módulo ativo para redesenhar o gráfico com as cores do novo tema.
+    const activePanel = document.querySelector(".panel.active");
+    const panelId = activePanel ? activePanel.id : null;
+    const calculator = panelId ? calculatorsByPanel[panelId] : null;
+
+    if (calculator) {
+      suppressHistorySave = true;
+      try {
+        calculator();
+      } finally {
+        suppressHistorySave = false;
+      }
+    }
   });
 })();
 
@@ -45,6 +59,7 @@ const calculatorsByPanel = {
 
 const HISTORY_KEY = "winston_calculos_historico";
 let historicoCalculos = [];
+let suppressHistorySave = false;
 
 function showPanel(panelId) {
   panels.forEach((panel) => {
@@ -127,11 +142,71 @@ function print(targetId, message) {
   }
 }
 
+const panelByModulo = {
+  "Juros Compostos": "juros-compostos",
+  "Juros Simples": "juros-simples",
+  "Equação 1º": "equacao-primeiro",
+  "Equação 2º": "equacao-segundo",
+  "Função 1º": "funcao-primeiro",
+  "Função 2º": "funcao-segundo",
+  "Inequação 1º": "inequacao-primeiro",
+  "Inequação 2º": "inequacao-segundo",
+  Conjuntos: "conjuntos",
+  "Domínio e Imagem": "dominio-imagem"
+};
+
+function snapshotPanelState(panelId) {
+  const panel = byId(panelId);
+
+  if (!panel) {
+    return null;
+  }
+
+  const state = {};
+  panel.querySelectorAll("input[id], select[id]").forEach((field) => {
+    state[field.id] = field.value;
+  });
+
+  return state;
+}
+
+function restorePanelState(panelId, formData) {
+  if (!formData || typeof formData !== "object") {
+    return;
+  }
+
+  Object.entries(formData).forEach(([id, value]) => {
+    const field = byId(id);
+
+    if (!field) {
+      return;
+    }
+
+    field.value = value;
+    field.dispatchEvent(new Event("input", { bubbles: true }));
+    field.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+
+  const calculator = calculatorsByPanel[panelId];
+  if (calculator) {
+    calculator();
+  }
+}
+
 function addHistoryEntry(modulo, descricao) {
+  if (suppressHistorySave) {
+    return;
+  }
+
+  const panelId = panelByModulo[modulo] || null;
+  const formData = panelId ? snapshotPanelState(panelId) : null;
+
   historicoCalculos.unshift({
     modulo,
     descricao,
-    quando: new Date().toLocaleString("pt-BR")
+    quando: new Date().toLocaleString("pt-BR"),
+    panelId,
+    formData
   });
 
   historicoCalculos = historicoCalculos.slice(0, 50);
@@ -159,7 +234,30 @@ function renderHistorico() {
   historicoCalculos.forEach((item) => {
     const li = document.createElement("li");
     li.className = "history-item";
-    li.textContent = `[${item.quando}] ${item.modulo}: ${item.descricao}`;
+
+    const text = document.createElement("span");
+    text.className = "history-text";
+    text.textContent = `[${item.quando}] ${item.modulo}: ${item.descricao}`;
+    li.appendChild(text);
+
+    const recreateBtn = document.createElement("button");
+    recreateBtn.type = "button";
+    recreateBtn.className = "history-recreate-btn";
+    recreateBtn.textContent = "Recriar";
+
+    const canRecreate = Boolean(item.panelId && item.formData);
+    recreateBtn.disabled = !canRecreate;
+
+    if (canRecreate) {
+      recreateBtn.addEventListener("click", () => {
+        showPanel(item.panelId);
+        restorePanelState(item.panelId, item.formData);
+      });
+    } else {
+      recreateBtn.title = "Esse registro antigo não possui dados para recriar.";
+    }
+
+    li.appendChild(recreateBtn);
     list.appendChild(li);
   });
 }
