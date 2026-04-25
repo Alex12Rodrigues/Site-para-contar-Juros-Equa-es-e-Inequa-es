@@ -6,8 +6,8 @@ O objetivo do projeto é deixar os cálculos mais simples de entender, com inter
 
 ## Acesso online
 
-- Site publicado no novo domínio: https://appdowinston.gamer.gd/
-- Esse domínio é mutável, então possa ter outro rs rs.
+- Site publicado no novo domínio: https://projetosalex.gamer.gd/
+- Esse domínio é mutável, então possa ter outro projeto rs rs.
 
 ## Índice
 
